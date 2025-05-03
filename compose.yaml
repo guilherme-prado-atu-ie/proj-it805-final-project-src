@@ -1,0 +1,7 @@
+﻿services:
+  ekibra.web:
+    image: ekibra.web
+    build:
+      context: .
+      dockerfile: eKIBRA.Web/Dockerfile
+
