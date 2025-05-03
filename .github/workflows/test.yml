@@ -23,7 +23,7 @@ concurrency:
 
 jobs:
   test:
-    name: Test
+    name: Run Tests
     runs-on: ubuntu-latest
     
     permissions:
@@ -51,15 +51,7 @@ jobs:
       - name: Test with the dotnet CLI
         run: dotnet test --collect:"XPlat Code Coverage"
         
-#      - name: Upload artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: .TestResults
-#          path: ${{env.DOTNET_ROOT}}/TestResults
-      
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
         with:
-          files: ./TestResults/**/coverage.cobertura.xml
           token: ${{ secrets.CODECOV_TOKEN }}
-          # slug: guilherme-prado-atu-ie/proj-it805-final-project-src
