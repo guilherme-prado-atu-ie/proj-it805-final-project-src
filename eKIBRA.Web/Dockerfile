@@ -9,7 +9,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["eKIBRA.Web/eKIBRA.Web.csproj", "eKIBRA.Web/"]
 RUN dotnet restore "eKIBRA.Web/eKIBRA.Web.csproj"
-COPY . .
+COPY "src/eKIBRA.Web" "src/eKIBRA.Web"
 WORKDIR "/src/eKIBRA.Web"
 RUN dotnet build "./eKIBRA.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -17,7 +17,7 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./eKIBRA.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+FROM publish AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "eKIBRA.Web.dll"]
