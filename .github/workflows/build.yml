@@ -61,5 +61,4 @@ jobs:
         with:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
-          # tags: ghcr.io/${{ env.REPO }}:${{ env.ekibra_version }}
-          file: ./eKIBRA.Web/Dockerfile
+          file: ./Dockerfile
