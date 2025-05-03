@@ -1,0 +1,10 @@
+﻿name:               eKIBRA
+version:            v0.0.1
+synopsis:           A software implementation of Spaced Repetition Method (SRM) for learners 
+description:        Allows learners to include study content for further use in solo practice sessions ruled by SRM.
+                    Providing analysis at the end of each section to assist learners in identifying weaknesses in their 
+                    knowledge retention.
+license:            MIT
+license-file:       LICENSE
+author:             Guilherme Prado
+maintainer:         Guilherme Prado <L00188300@atu.ie>

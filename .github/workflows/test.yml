@@ -1,0 +1,66 @@
+﻿name: Test
+
+on:
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: false
+  pull_request:
+    branches:
+      - main
+      - v[0-9]+
+    paths:
+      - .github/workflows/test.yaml
+      - eKIBRA.info
+      - '**.cs'
+      - test/**
+      - '!**.md'
+
+concurrency:
+  # Terminate all previous runs of the same workflow for pull requests
+  group: test-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read #This is required for actions/checkout
+    
+    defaults:
+      run:
+        # Hack for enabling color output, see:
+        # https://github.com/actions/runner/issues/241#issuecomment-842566950
+        shell: script -qec "bash --noprofile --norc -eo pipefail {0}"
+      
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.x'
+          cache: 'true'
+          
+      - name: Install dependencies
+        run: dotnet restore
+        
+      - name: Build
+        run: dotnet build --no-restore
+        
+      - name: Test with the dotnet CLI
+        run: dotnet test --collect:"XPlat Code Coverage"
+        
+#      - name: Upload artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: .TestResults
+#          path: ${{env.DOTNET_ROOT}}/TestResults
+      
+      - name: Upload results to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          #files: ./TestResults/**/coverage.cobertura.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: guilherme-prado-atu-ie/proj-it805-final-project-src
