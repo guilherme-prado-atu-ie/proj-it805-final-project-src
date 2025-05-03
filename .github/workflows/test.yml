@@ -1,14 +1,14 @@
 ﻿name: Test
 
 on:
-  pull_request:
-  workflow_call:    
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: false    
+  pull_request:    
     branches:
       - main
       - v[0-9]+  
-    secrets:
-      CODECOV_TOKEN:
-        required: false
     paths:
       - .github/workflows/test.yaml
       - eKIBRA.info
