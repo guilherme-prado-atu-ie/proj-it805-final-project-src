@@ -58,9 +58,9 @@ jobs:
           ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
 
           if [[ "$ekibra_version" == *.*.* ]]; then
-            echo ekibra_version="v$ekibra_version"
+            echo ekibra_version
           else
-            echo ekibra_version="devel"
+            echo ekibra_version="latest"
           fi
 
       - name: Lowercase the repo name
