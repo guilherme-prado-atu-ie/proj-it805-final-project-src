@@ -1,8 +1,8 @@
-﻿name: Build and Publish Docker
+﻿name: Build, Scan and Publish Docker
 
 on:
-  workflow_call:
   pull_request:
+  workflow_call:
     branches:
       - main
       - v[0-9]+
@@ -30,19 +30,19 @@ jobs:
         # Hack for enabling color output, see:
         # https://github.com/actions/runner/issues/241#issuecomment-842566950
         shell: script -qec "bash --noprofile --norc -eo pipefail {0}"
-        
+    
     steps:
       - name: Anchore Scan project
-        uses: anchore/scan-action@v6        
+        uses: anchore/scan-action@v6
         with:
           path: "."
           fail-build: true
           severity-cutoff: critical
-          
+
       - uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.EKIBRA_SSH_KEY }} # uses a preconfigure GitHub SSH
-          
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
