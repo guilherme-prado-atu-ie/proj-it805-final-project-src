@@ -16,6 +16,7 @@ RUN dotnet publish -c release -o /app --no-restore
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
+USER $APP_UID
 WORKDIR /app
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "eKIBRA.Web.dll"]
