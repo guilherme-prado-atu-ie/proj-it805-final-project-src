@@ -53,16 +53,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get commit current eKIBRA.info version
-        run: |
-          ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
-
-          if [[ "$ekibra_version" == *.*.* ]]; then
-            echo ekibra_version
-          else
-            echo ekibra_version="latest"
-          fi
-
       - name: Lowercase the repo name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
 
@@ -70,6 +60,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          # tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
-          tags: ghcr.io/${{ env.REPO }}:${{ env.ekibra_version }}
+          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
+          # tags: ghcr.io/${{ env.REPO }}:${{ env.ekibra_version }}
           file: ./Dockerfile
