@@ -1,0 +1,46 @@
+﻿name: Continuous Deploy (Azure)
+
+env:
+  AZURE_WEBAPP_NAME: "ekibra-web"
+  
+on:
+  push:
+    tags:
+      - devel
+      - v*
+
+concurrency:
+  # Terminate all previous runs of the same workflow for the same tag.
+  group: deploy-${{ github.ref }}
+  # TODO: Enable this once https://github.com/orgs/community/discussions/13015 is solved
+  cancel-in-progress: false
+
+permissions:
+  contents: 'read'
+  packages: 'write'
+  
+jobs:
+  database:
+    name: EF Migrations
+    uses: ./.github/workflows/migrate.yml
+    
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+      
+    needs: database
+    
+    steps:
+      - name: Lowercase the repo name
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          images: 'ghcr.io/${{ env.REPO }}:${{ github.sha }}'
