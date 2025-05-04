@@ -46,10 +46,9 @@ jobs:
 
       - name: Run EF Migrations
         env:
-          #DOTNET_PROJECT_NAME: "eKIBRA.Web/eKIBRA.Web.csproj"
           ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}  # Use your connection string
         run: |
-          dotnet ef database update --project "${{ github.workspace }}/eKIBRA.Web" # Replace with your project name
+          dotnet ef database update --project "${{ github.workspace }}/eKIBRA.Web/eKIBRA.Web.csproj" # Replace with your project name
 
 
 
