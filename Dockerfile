@@ -1,7 +1,5 @@
 ﻿# https://hub.docker.com/_/microsoft-dotnet
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-EXPOSE 8080
-EXPOSE 8081
 WORKDIR /src
 
 # copy csproj and restore as distinct layers
@@ -17,6 +15,11 @@ RUN dotnet publish -c release -o /app --no-restore
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 USER $APP_UID
+EXPOSE 80
+
 WORKDIR /app
 COPY --from=build /app ./
+
+ENV ASPNETCORE_URLS="http://+"
+
 ENTRYPOINT ["dotnet", "eKIBRA.Web.dll"]
