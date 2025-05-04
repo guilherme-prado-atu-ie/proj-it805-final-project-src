@@ -19,23 +19,23 @@ jobs:
     permissions:
       contents: read #This is required for actions/checkout
       
-    steps:
-      - name: Anchore Scan
-        uses: anchore/scan-action@v6
-        with:
-          path: "."
-          fail-build: true
-          severity-cutoff: critical
-          
+    steps:          
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Anchore scan
+        uses: anchore/scan-action@v6
+        with:
+          path: ${{ github.workspace }}
+          fail-build: true
+          severity-cutoff: critical
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.x'
           
-      - name: Install dependencies
+      - name: Restore dependencies
         run: dotnet restore
         
       - name: Check Code Formatting

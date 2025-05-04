@@ -21,12 +21,13 @@ permissions:
   
 jobs:
   database:
-    name: EF Migrations
+    name: Deploy Database
     uses: ./.github/workflows/migrate.yml
     secrets:
       CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
     
   deploy:
+    name: Deploy Container
     runs-on: ubuntu-latest
 
     environment:
