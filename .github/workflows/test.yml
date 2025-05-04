@@ -19,16 +19,16 @@ jobs:
     permissions:
       contents: read #This is required for actions/checkout
       
-    steps:
+    steps:          
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Anchore Scan
         uses: anchore/scan-action@v6
         with:
           path: "."
           fail-build: true
           severity-cutoff: critical
-          
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
