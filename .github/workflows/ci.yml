@@ -38,6 +38,8 @@ jobs:
       cancel-in-progress: false
       
     if: vars.RELEASE_ENABLED
+    # apply tags only when is merging to main
+    #if: github.event_name != 'pull_request'
 
     needs:
       - test

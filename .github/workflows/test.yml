@@ -1,13 +1,7 @@
 ﻿name: Check and Test
 
 on:
-  pull_request:
-    branches:
-      - main
-      - v[0-9]+
   workflow_call:
-    CODECOV_TOKEN:
-      required: false
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests
