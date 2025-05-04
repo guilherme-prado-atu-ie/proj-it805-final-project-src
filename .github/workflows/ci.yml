@@ -19,6 +19,9 @@ jobs:
     permissions:
       contents: 'read'
       packages: 'write'
+    
+    needs:
+      - test      
 
     name: .NET Core Docker
     uses: ./.github/workflows/build.yml      
