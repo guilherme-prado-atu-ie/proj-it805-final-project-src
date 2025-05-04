@@ -1,17 +1,7 @@
-﻿name: Build, Scan and Publish Docker
+﻿name: Build Docker
 
 on:
   workflow_call:
-#  pull_request:
-#    branches:
-#      - main
-#      - v[0-9]+
-#    paths:
-#      - .github/workflows/build.yaml
-#      - eKIBRA.info
-#      - '**.cs'
-#      - test/**
-#      - '!**.md'
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests

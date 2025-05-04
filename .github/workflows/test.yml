@@ -2,19 +2,6 @@
 
 on:
   workflow_call:
-#    secrets:
-#      CODECOV_TOKEN:
-#        required: false    
-#  pull_request:    
-#    branches:
-#      - main
-#      - v[0-9]+  
-#    paths:
-#      - .github/workflows/test.yaml
-#      - eKIBRA.info
-#      - '**.cs'
-#      - test/**
-#      - '!**.md'
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests
