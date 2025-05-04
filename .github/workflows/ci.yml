@@ -1,25 +1,33 @@
 ﻿name: Continuous Integration
 
-on:  
+on:
   push:
     branches:
       - main
       - v[0-9]+
-  pull_request:    
+  pull_request:
     branches:
       - main
       - v[0-9]+
-
 jobs:
   test:
     name: .NET Core Test
     uses: ./.github/workflows/test.yml
+    secrets: 
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   
-  docker:          
+  docker:
+    permissions:
+      contents: 'read'
+      packages: 'write'
+    
+    needs:
+      - test      
+
     name: .NET Core Docker
-    uses: ./.github/workflows/build.yml      
+    uses: ./.github/workflows/build.yml
       
-  tag:
+  tag:    
     runs-on: ubuntu-latest    
     name: Version Tag
     
@@ -30,27 +38,41 @@ jobs:
       cancel-in-progress: false
       
     if: vars.RELEASE_ENABLED
+    # apply tags only when is merging to main
+    #if: github.event_name != 'pull_request'
 
     needs:
       - test
       - docker
     
     steps:
-      - uses: actions/checkout@v4
+      # changing to always tag
+      - uses: actions/checkout@v4      
         with:
           ssh-key: ${{ secrets.EKIBRA_SSH_KEY }} # uses a preconfigure GitHub SSH
-      - name: Tag latest commit
+      - name: Tag latest commit        
         run: |
           ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
 
           if [[ "$ekibra_version" == *.*.* ]]; then
             git fetch --tags
-
-            if [ -z "$(git tag --list "v$ekibra_version")" ]; then
-              git tag "v$ekibra_version"
-              git push origin "v$ekibra_version"
-            fi
+            git tag "v$ekibra_version"
+            git push origin "v$ekibra_version"
           else
             git tag -f "devel"
             git push -f origin "devel"
-          fi      
+          fi          
+#        run: |
+#          ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
+#
+#          if [[ "$ekibra_version" == *.*.* ]]; then
+#            git fetch --tags
+#
+#            if [ -z "$(git tag --list "v$ekibra_version")" ]; then
+#              git tag "v$ekibra_version"
+#              git push origin "v$ekibra_version"
+#            fi
+#          else
+#            git tag -f "devel"
+#            git push -f origin "devel"
+#          fi

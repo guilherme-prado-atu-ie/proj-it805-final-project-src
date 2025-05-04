@@ -1,20 +1,10 @@
-﻿name: Check and Test
+﻿name: Check and Test 
 
 on:
   workflow_call:
-#    secrets:
-#      CODECOV_TOKEN:
-#        required: false    
-#  pull_request:    
-#    branches:
-#      - main
-#      - v[0-9]+  
-#    paths:
-#      - .github/workflows/test.yaml
-#      - eKIBRA.info
-#      - '**.cs'
-#      - test/**
-#      - '!**.md'
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests
@@ -23,7 +13,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Checks and Tests
     runs-on: ubuntu-latest
     
     permissions:
@@ -37,8 +27,10 @@ jobs:
           fail-build: true
           severity-cutoff: critical
           
-      - uses: actions/checkout@v4
-      - name: Setup dotnet
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.x'
@@ -48,9 +40,6 @@ jobs:
         
       - name: Check Code Formatting
         run: dotnet format --verify-no-changes  
-        
-#      - name: Build
-#        run: dotnet build --no-restore
         
       - name: Test with the dotnet CLI
         run: dotnet test --collect:"XPlat Code Coverage"

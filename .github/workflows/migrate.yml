@@ -1,7 +1,9 @@
-﻿name: EF Migrations
+﻿name: Migrate Database
 
 on:
   workflow_call:
+    CONNECTIONSTRINGS__DEFAULTCONNECTION:
+      required: true
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests
@@ -10,14 +12,15 @@ concurrency:
   
 jobs:
   ef-migrations:
+    name: Run Migrations
     runs-on: ubuntu-latest
 
-    steps:
+    steps:        
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.x'
 
@@ -26,7 +29,7 @@ jobs:
 
       - name: Run EF Migrations
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
+          ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}          
         run: |
           dotnet new tool-manifest
           dotnet tool install dotnet-ef         

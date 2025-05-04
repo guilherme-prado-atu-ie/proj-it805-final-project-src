@@ -1,17 +1,7 @@
-﻿name: Build, Scan and Publish Docker
+﻿name: Build Container
 
 on:
   workflow_call:
-#  pull_request:
-#    branches:
-#      - main
-#      - v[0-9]+
-#    paths:
-#      - .github/workflows/build.yaml
-#      - eKIBRA.info
-#      - '**.cs'
-#      - test/**
-#      - '!**.md'
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests
@@ -24,6 +14,7 @@ permissions:
 
 jobs:
   build:
+    name: Build and Publish Container
     runs-on: ubuntu-latest
     
     steps:

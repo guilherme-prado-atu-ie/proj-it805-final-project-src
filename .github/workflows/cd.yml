@@ -1,4 +1,4 @@
-﻿name: Continuous Deploy (Azure)
+﻿name: Continuous Deploy
 
 env:
   AZURE_WEBAPP_NAME: "ekibra-web"
@@ -23,6 +23,8 @@ jobs:
   database:
     name: EF Migrations
     uses: ./.github/workflows/migrate.yml
+    secrets:
+      CONNECTIONSTRINGS__DEFAULTCONNECTION: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
     
   deploy:
     runs-on: ubuntu-latest
