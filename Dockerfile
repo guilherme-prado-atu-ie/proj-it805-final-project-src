@@ -16,6 +16,7 @@ RUN dotnet publish -c release -o /app --no-restore
 FROM mcr.microsoft.com/dotnet/aspnet:9.0
 USER $APP_UID
 EXPOSE 80
+
 WORKDIR /app
 COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "eKIBRA.Web.dll", "--urls", "http://0.0.0.0:80"]
+ENTRYPOINT ["dotnet", "eKIBRA.Web.dll", "--urls", "http://+"]
