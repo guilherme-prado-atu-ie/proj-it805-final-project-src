@@ -48,6 +48,9 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}  # Use your connection string
         run: |
+          dotnet new tool-manifest
+          dotnet tool install dotnet-ef         
+          dotnet tool restore  
           dotnet ef database update --project eKIBRA.Web
         # "${{ github.workspace }}/eKIBRA.Web/eKIBRA.Web.csproj" # Replace with your project name
 
