@@ -46,23 +46,33 @@ jobs:
       - docker
     
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4        
-      
+      - uses: actions/checkout@v4      
       - name: Tag latest commit
         with:
-          ssh-key: ${{ secrets.EKIBRA_SSH_KEY }} # uses a preconfigure GitHub SSH        
+          ssh-key: ${{ secrets.EKIBRA_SSH_KEY }} # uses a preconfigure GitHub SSH
+        # changing to always tag
         run: |
           ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
 
           if [[ "$ekibra_version" == *.*.* ]]; then
             git fetch --tags
-
-            if [ -z "$(git tag --list "v$ekibra_version")" ]; then
-              git tag "v$ekibra_version"
-              git push origin "v$ekibra_version"
-            fi
+            git tag "v$ekibra_version"
+            git push origin "v$ekibra_version"
           else
             git tag -f "devel"
             git push -f origin "devel"
-          fi
+          fi          
+#        run: |
+#          ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
+#
+#          if [[ "$ekibra_version" == *.*.* ]]; then
+#            git fetch --tags
+#
+#            if [ -z "$(git tag --list "v$ekibra_version")" ]; then
+#              git tag "v$ekibra_version"
+#              git push origin "v$ekibra_version"
+#            fi
+#          else
+#            git tag -f "devel"
+#            git push -f origin "devel"
+#          fi
