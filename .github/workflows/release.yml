@@ -2,6 +2,7 @@
 
 env:
   AZURE_WEBAPP_NAME: "ekibra-web"
+  API_PROJECT_NAME: "./eKIBRA.Web/eKIBRA.Web.csproj"
   
 on:
   push:
@@ -19,14 +20,53 @@ permissions:
   contents: 'read'
   packages: 'write'
   
-jobs:    
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    
+    environment:
+      name: 'Production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
+    steps:
+      - name: Setup EF Tools
+        run: |
+          dotnet tool install --global dotnet-ef 
+          dotnet tool restore 
+
+      - name: Bundle EF Migrations
+        run: |
+          dotnet ef migrations bundle  
+          -r linux-x64  
+          --project ${{ env.API_PROJECT_NAME }} 
+
+      - name: Upload EF Migrations Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: efbundle
+          path: ./efbundle
+
+      - name: Download EF Bundle Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: efbundle
+          path: artifacts/efbundle
+
+      - name: Migrate Database
+        shell: bash
+        run: |
+          chmod +x ./artifacts/efbundle/efbundle 
+          ./artifacts/efbundle/efbundle --connection "${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}"
+    
   deploy:
     runs-on: ubuntu-latest
 
     environment:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-
+      
+    needs: migrate
+    
     steps:
       - name: Lowercase the repo name
         run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
