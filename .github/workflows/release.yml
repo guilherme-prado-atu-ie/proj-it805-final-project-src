@@ -36,9 +36,7 @@ jobs:
 
       - name: Bundle EF Migrations
         run: |
-          dotnet ef migrations bundle  
-          -r linux-x64  
-          --project ${{ env.DOTNET_PROJECT_NAME }} 
+          dotnet ef migrations bundle -r linux-x64 --project ${{ env.DOTNET_PROJECT_NAME }} 
 
       - name: Upload EF Migrations Bundle Artifact
         uses: actions/upload-artifact@v4
