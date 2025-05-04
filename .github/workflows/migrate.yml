@@ -1,33 +1,13 @@
-﻿#jobs:
-#  build:
-#
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Setup .NET
-#        uses: actions/setup-dotnet@v4
-#        with:
-#          dotnet-version: 8.0.x
-#      - name: Restore dependencies
-#        run: dotnet restore
-#      - name: Build
-#        run: dotnet build --no-restore
-#      - name: Test
-#        run: dotnet test --no-build --verbosity normal
-
-
-
-name: EF Migrations
+﻿name: EF Migrations
 
 on:
-  push:
-    branches:
-      - main  # Change this to your default branch
-  pull_request:
-    branches:
-      - main  # Change this to your default branch
+  workflow_call:
 
+concurrency:
+  # Terminate all previous runs of the same workflow for pull requests
+  group: migrate-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+  
 jobs:
   ef-migrations:
     runs-on: ubuntu-latest
@@ -39,83 +19,16 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v2
         with:
-          dotnet-version: '9.x'  # Specify your .NET version
+          dotnet-version: '9.x'
 
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Run EF Migrations
         env:
-          ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}  # Use your connection string
+          ConnectionStrings__DefaultConnection: ${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}
         run: |
           dotnet new tool-manifest
           dotnet tool install dotnet-ef         
           dotnet tool restore  
           dotnet ef database update --project eKIBRA.Web
-        # "${{ github.workspace }}/eKIBRA.Web/eKIBRA.Web.csproj" # Replace with your project name
-
-
-
-
-
-
-#name: Database Migrate
-#
-#env:
-#  AZURE_WEBAPP_NAME: "ekibra-web"
-#  DOTNET_PROJECT_NAME: "eKIBRA.Web/eKIBRA.Web.csproj"
-#  
-#on:
-#  push:
-#    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
-#
-#concurrency:
-#  # Terminate all previous runs of the same workflow for the same tag.
-#  group: migrate-${{ github.ref }}
-#  # TODO: Enable this once https://github.com/orgs/community/discussions/13015 is solved
-#  cancel-in-progress: false
-#
-#permissions:
-#  contents: 'read'
-#  packages: 'write'
-#
-#jobs:
-#  migrate:
-#    runs-on: ubuntu-latest
-#    
-#    environment:
-#      name: 'Production'
-#      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-#    
-#    steps:
-#      # dotnet tool install --global dotnet-ef
-#      - name: Setup EF Tools
-#        run: |
-#          dotnet new tool-manifest
-#          dotnet tool install dotnet-ef         
-#          dotnet tool restore         
-#
-#      - name: Bundle EF Migrations
-#        run: |
-#          dotnet ef migrations bundle -r linux-x64 
-#      # --project ${{ env.DOTNET_PROJECT_NAME }}          
-#
-#      - name: Upload EF Migrations Bundle Artifact
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: efbundle
-#          path: ./efbundle
-#
-#      - name: Download EF Bundle Artifact
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: efbundle
-#          path: artifacts/efbundle
-#
-#      - name: Migrate Database
-#        shell: bash
-#        run: |
-#          chmod +x ./artifacts/efbundle/efbundle 
-#          ./artifacts/efbundle/efbundle --connection "${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}"
