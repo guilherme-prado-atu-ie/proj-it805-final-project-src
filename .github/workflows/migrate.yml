@@ -21,7 +21,7 @@ name: Database Migrate
 
 env:
   AZURE_WEBAPP_NAME: "ekibra-web"
-  DOTNET_PROJECT_NAME: "eKIBRA.Web.csproj"
+  DOTNET_PROJECT_NAME: "eKIBRA.Web"
   
 on:
   push:
@@ -31,7 +31,7 @@ on:
 
 concurrency:
   # Terminate all previous runs of the same workflow for the same tag.
-  group: release-${{ github.ref }}
+  group: migrate-${{ github.ref }}
   # TODO: Enable this once https://github.com/orgs/community/discussions/13015 is solved
   cancel-in-progress: false
 
@@ -57,7 +57,6 @@ jobs:
 
       - name: Bundle EF Migrations
         run: |
-          cd eKIBRA.Web
           dotnet ef migrations bundle -r linux-x64 --project ${{ env.DOTNET_PROJECT_NAME }} 
 
       - name: Upload EF Migrations Bundle Artifact
