@@ -46,11 +46,11 @@ jobs:
       - docker
     
     steps:
+      # changing to always tag
       - uses: actions/checkout@v4      
       - name: Tag latest commit
         with:
           ssh-key: ${{ secrets.EKIBRA_SSH_KEY }} # uses a preconfigure GitHub SSH
-        # changing to always tag
         run: |
           ekibra_version="$(grep -oP '^version:\s*\K.*' eKIBRA.info)"
 
