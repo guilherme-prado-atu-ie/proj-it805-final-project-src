@@ -21,40 +21,43 @@ permissions:
   packages: 'write'
   
 jobs:
-  migrate:
-    runs-on: ubuntu-latest
-    
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
-    
-    steps:
-      - name: Setup EF Tools
-        run: |
-          dotnet tool install --global dotnet-ef 
-          dotnet tool restore 
-
-      - name: Bundle EF Migrations
-        run: |
-          dotnet ef migrations bundle -r linux-x64 --project ${{ env.DOTNET_PROJECT_NAME }} 
-
-      - name: Upload EF Migrations Bundle Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: efbundle
-          path: ./efbundle
-
-      - name: Download EF Bundle Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: efbundle
-          path: artifacts/efbundle
-
-      - name: Migrate Database
-        shell: bash
-        run: |
-          chmod +x ./artifacts/efbundle/efbundle 
-          ./artifacts/efbundle/efbundle --connection "${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}"
+#  migrate:
+#    runs-on: ubuntu-latest
+#    
+#    environment:
+#      name: 'Production'
+#      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+#    
+#    steps:
+#      - name: Setup EF Tools
+#        run: |
+#          dotnet tool install --global dotnet-ef 
+#          dotnet tool restore 
+#          
+#          dotnet new tool-manifest
+#          dotnet tool install dotnet-ef          
+#
+#      - name: Bundle EF Migrations
+#        run: |
+#          dotnet ef migrations bundle -r linux-x64 --project ${{ env.DOTNET_PROJECT_NAME }} 
+#
+#      - name: Upload EF Migrations Bundle Artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: efbundle
+#          path: ./efbundle
+#
+#      - name: Download EF Bundle Artifact
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: efbundle
+#          path: artifacts/efbundle
+#
+#      - name: Migrate Database
+#        shell: bash
+#        run: |
+#          chmod +x ./artifacts/efbundle/efbundle 
+#          ./artifacts/efbundle/efbundle --connection "${{ secrets.CONNECTIONSTRINGS__DEFAULTCONNECTION }}"
     
   deploy:
     runs-on: ubuntu-latest
@@ -63,7 +66,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
       
-    needs: migrate
+    # needs: migrate
     
     steps:
       - name: Lowercase the repo name
