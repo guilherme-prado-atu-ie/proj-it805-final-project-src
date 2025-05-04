@@ -23,10 +23,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Anchore Scan
+      - name: Anchore scan
         uses: anchore/scan-action@v6
         with:
-          path: "."
+          path: ${{ github.workspace }}
           fail-build: true
           severity-cutoff: critical
 
@@ -35,7 +35,7 @@ jobs:
         with:
           dotnet-version: '9.x'
           
-      - name: Install dependencies
+      - name: Restore dependencies
         run: dotnet restore
         
       - name: Check Code Formatting
