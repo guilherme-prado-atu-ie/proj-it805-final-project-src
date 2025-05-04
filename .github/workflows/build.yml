@@ -37,3 +37,17 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           file: ./Dockerfile
+
+      - name: Scan container image
+        uses: anchore/scan-action@v6
+        with:
+          image: ghcr.io/${{ env.REPO }}:${{ github.sha }}
+          fail-build: true
+          severity-cutoff: critical
+
+#      - name: Anchore scan
+#        uses: anchore/scan-action@v6
+#        with:
+#          path: ${{ github.workspace }}
+#          fail-build: true
+#          severity-cutoff: critical

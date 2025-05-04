@@ -2,8 +2,9 @@
 
 on:
   workflow_call:
-    CONNECTIONSTRINGS__DEFAULTCONNECTION:
-      required: true
+    secrets:
+      CONNECTIONSTRINGS__DEFAULTCONNECTION:
+        required: true
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests

@@ -19,14 +19,7 @@ jobs:
     permissions:
       contents: read #This is required for actions/checkout
       
-    steps:
-      - name: Anchore Scan
-        uses: anchore/scan-action@v6
-        with:
-          path: "."
-          fail-build: true
-          severity-cutoff: critical
-          
+    steps:          
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -35,11 +28,11 @@ jobs:
         with:
           dotnet-version: '9.x'
           
-      - name: Install dependencies
+      - name: Restore dependencies
         run: dotnet restore
         
       - name: Check Code Formatting
-        run: dotnet format --verify-no-changes  
+        run: dotnet format --verify-no-changes
         
       - name: Test with the dotnet CLI
         run: dotnet test --collect:"XPlat Code Coverage"
