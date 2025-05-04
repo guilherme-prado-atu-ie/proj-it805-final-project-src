@@ -2,7 +2,7 @@
 
 env:
   AZURE_WEBAPP_NAME: "ekibra-web"
-  DOTNET_PROJECT_NAME: "eKIBRA.Web"
+  DOTNET_PROJECT_NAME: "eKIBRA.Web/eKIBRA.Web.csproj"
   
 on:
   push:
