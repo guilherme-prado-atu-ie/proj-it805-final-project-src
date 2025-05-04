@@ -15,7 +15,11 @@ jobs:
     name: .NET Core Test
     uses: ./.github/workflows/test.yml
   
-  docker:          
+  docker:
+    permissions:
+      contents: 'read'
+      packages: 'write'
+
     name: .NET Core Docker
     uses: ./.github/workflows/build.yml      
       
