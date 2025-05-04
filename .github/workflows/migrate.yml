@@ -1,4 +1,4 @@
-﻿name: Migrations
+﻿name: Migrate Database
 
 on:
   workflow_call:
@@ -12,6 +12,7 @@ concurrency:
   
 jobs:
   ef-migrations:
+    name: Run Migrations
     runs-on: ubuntu-latest
 
     steps:        

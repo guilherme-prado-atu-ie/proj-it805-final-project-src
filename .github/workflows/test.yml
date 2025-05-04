@@ -1,7 +1,10 @@
-﻿name: Check and Test
+﻿name: Check and Test 
 
 on:
   workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 concurrency:
   # Terminate all previous runs of the same workflow for pull requests
@@ -10,7 +13,7 @@ concurrency:
 
 jobs:
   test:
-    name: Run Tests
+    name: Run Checks and Tests
     runs-on: ubuntu-latest
     
     permissions:
