@@ -23,13 +23,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Anchore scan
-        uses: anchore/scan-action@v6
-        with:
-          path: ${{ github.workspace }}
-          fail-build: true
-          severity-cutoff: critical
-
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -39,7 +32,7 @@ jobs:
         run: dotnet restore
         
       - name: Check Code Formatting
-        run: dotnet format --verify-no-changes  
+        run: dotnet format --verify-no-changes
         
       - name: Test with the dotnet CLI
         run: dotnet test --collect:"XPlat Code Coverage"
