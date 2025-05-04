@@ -19,4 +19,5 @@ EXPOSE 80
 
 WORKDIR /app
 COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "eKIBRA.Web.dll", "--urls", "http://+"]
+
+ENTRYPOINT ["dotnet", "eKIBRA.Web.dll", "--urls", "http://[::]:80"]
