@@ -4,12 +4,18 @@
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
-updates:
-  - package-ecosystem: "dotnet-sdk" # See documentation for possible values
-    directory: "/src" # Location of package manifests
+updates:      
+  - package-ecosystem: "dotnet-sdk"
+    directory: "/"
     schedule:
-      interval: "weekly"
-  - package-ecosystem: "nuget" # See documentation for possible values
-    directory: "/src" # Location of package manifests
+      interval: "daily"
+      
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    directory: "/"
     schedule:
       interval: "weekly"
