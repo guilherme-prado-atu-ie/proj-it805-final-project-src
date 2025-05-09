@@ -17,9 +17,9 @@ RUN dotnet publish -c release -o /app \
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
-EXPOSE 8080
-EXPOSE 8081
-#EXPOSE 80
+#EXPOSE 8080
+#EXPOSE 8081
+EXPOSE 80
 
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/aspnetapp/Dockerfile.alpine-icu
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
@@ -33,21 +33,22 @@ RUN apk add --upgrade --no-cache \
     icu-data-full \
     icu-libs \
     tzdata
-    
-COPY cert.crt /https/cert.crt
-COPY cert.key /https/cert.key
 
 WORKDIR /app
+# Reverting dotnet cert to avoid path issues with Azure
+# COPY --link aspnetapp.pfx /app
 COPY --link --from=build /app ./
- 
-ENV \
-    ASPNETCORE_Kestrel__Certificates__Default__Path="/https/cert.crt" \
-    ASPNETCORE_Kestrel__Certificates__Default__KeyPath="/https/cert.key" \
-    ASPNETCORE_URLS="https://+:8081;http://+:8080"
+
+# reverting some 
+#ENV \
 #    ASPNETCORE_Kestrel__Certificates__Default__Path="/app/aspnetapp.pfx"
+#    ASPNETCORE_URLS="https://+:443;http://+80"    
 #    ASPNETCORE_Kestrel__Certificates__Default__Password="-\0pw-" \
 
-HEALTHCHECK CMD curl --fail --silent --show-error https://localhost:8081 || exit 1
+ENV \
+    ASPNETCORE_URLS="http://+"
+
+HEALTHCHECK CMD curl --fail --silent --show-error localhost || exit 1
 
 USER $APP_UID
 ENTRYPOINT ["./eKIBRA.Web"]
