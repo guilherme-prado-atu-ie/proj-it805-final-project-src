@@ -31,7 +31,7 @@ RUN apk add --upgrade --no-cache \
     curl \
     icu-data-full \
     icu-libs \
-    tzdata
+    tzdata 
 
 COPY cert.crt /https/cert.crt
 COPY cert.key /https/cert.key
@@ -43,8 +43,10 @@ ENV \
     ASPNETCORE_Kestrel__Certificates__Default__Path="/https/cert.crt" \
     ASPNETCORE_Kestrel__Certificates__Default__KeyPath="/https/cert.key" \
     ASPNETCORE_HTTP_PORTS="8080" \
-    ASPNETCORE_HTTPS_PORTS="8081"    
-#    ASPNETCORE_URLS="https://+;http://+"
+    ASPNETCORE_HTTPS_PORTS="8081" \
+    ASPNETCORE_URLS="https://+;http://+"
+#    ASPNETCORE_Kestrel__Certificates__Default__Path="/app/aspnetapp.pfx"
+#    ASPNETCORE_Kestrel__Certificates__Default__Password="-\0pw-" \
 
 HEALTHCHECK CMD curl --fail --silent --show-error localhost:8080 || exit 1
 
