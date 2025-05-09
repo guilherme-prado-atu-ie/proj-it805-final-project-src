@@ -17,8 +17,8 @@ RUN dotnet publish -c release -o /app \
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
-EXPOSE 80
-EXPOSE 443
+EXPOSE 8080
+EXPOSE 8081
 
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/aspnetapp/Dockerfile.alpine-icu
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
@@ -38,11 +38,11 @@ COPY --link aspnetapp.pfx /app
 COPY --link --from=build /app ./
 
 ENV \
-    ASPNETCORE_URLS="https://+:443;http://+:80" \
     ASPNETCORE_Kestrel__Certificates__Default__Path="/app/aspnetapp.pfx"
+#    ASPNETCORE_URLS="https://+:443;http://+80"    
 #    ASPNETCORE_Kestrel__Certificates__Default__Password="-\0pw-" \
 
-HEALTHCHECK CMD curl --fail --silent --show-error http://localhost || exit 1
+HEALTHCHECK CMD curl --fail --silent --show-error localhost:8080 || exit 1
 
 USER $APP_UID
 ENTRYPOINT ["dotnet", "eKIBRA.Web.dll"]
