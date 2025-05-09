@@ -17,8 +17,10 @@ RUN dotnet publish -c release -o /app \
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
-EXPOSE 8080
-EXPOSE 8081
+EXPOSE 8080/tcp
+EXPOSE 80/tcp
+EXPOSE 8081/tcp
+EXPOSE 443/tcp
 
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/aspnetapp/Dockerfile.alpine-icu
 # https://github.com/dotnet/dotnet-docker/blob/main/samples/enable-globalization.md
@@ -42,9 +44,8 @@ COPY --link --from=build /app ./
 ENV \
     ASPNETCORE_Kestrel__Certificates__Default__Path="/https/cert.crt" \
     ASPNETCORE_Kestrel__Certificates__Default__KeyPath="/https/cert.key" \
-    ASPNETCORE_HTTP_PORTS="8080" \
-    ASPNETCORE_HTTPS_PORTS="8081"    
-#    ASPNETCORE_URLS="https://+;http://+"
+    ASPNETCORE_HTTP_PORTS="80;8080" \
+    ASPNETCORE_HTTPS_PORTS="443;8081"
 
 HEALTHCHECK CMD curl --fail --silent --show-error localhost:8080 || exit 1
 
