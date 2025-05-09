@@ -45,7 +45,7 @@ ENV \
     ASPNETCORE_HTTP_PORTS="80" \
     ASPNETCORE_HTTPS_PORTS="443"
 
-HEALTHCHECK CMD curl --fail --silent --show-error localhost:8080 || exit 1
+HEALTHCHECK CMD curl --fail --silent --show-error localhost || exit 1
 
 USER $APP_UID
 ENTRYPOINT ["./eKIBRA.Web"]
