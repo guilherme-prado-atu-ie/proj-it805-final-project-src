@@ -9,6 +9,7 @@
 - [ ] Hotfix
 - [ ] Security patch
 - [ ] UI/UX improvement
+- [ ] Version
 
 ## Description
 [Provide a detailed explanation of the changes you have made. Include the reasons behind these changes and any relevant context. Link any related issues.]

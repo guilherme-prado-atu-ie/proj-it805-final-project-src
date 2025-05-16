@@ -9,13 +9,25 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    assignees:
+      - "guilherme-prado-atu-ie"
+    labels:
+      - "dependabot"
       
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
       interval: "daily"
+    assignees:
+      - "guilherme-prado-atu-ie"
+    labels:
+      - "dependabot"
 
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    assignees:
+      - "guilherme-prado-atu-ie"
+    labels:
+      - "dependabot"
