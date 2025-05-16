@@ -1,0 +1,158 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "git: clear-fdx",
+            "command": "git",
+            "type": "process",
+            "args": [
+                "clean",
+                "-fdx"
+            ],
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "dotnet: build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/eKIBRA.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "dotnet: publish",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "publish",
+                "${workspaceFolder}/eKIBRA.sln",
+                "-c",
+                "Release",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile",
+        },
+        {
+            "label": "dotnet: watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run",
+                "--project",
+                "${workspaceFolder}/eKIBRA.sln"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "dotnet: test",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "test",
+                "${workspaceFolder}/eKIBRA.sln",
+                "--no-restore",
+                "--no-build",
+                "--results-directory",
+                "./TestResults/ReportGenerator",
+                "--collect:\"XPlat Code Coverage\"",
+                "--",
+                "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura",
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        },
+        /* dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings */
+        {
+            "label": "dotnet: coverage-report",
+            "command": "reportgenerator",
+            "type": "process",
+            "args": [
+                "-reports:${workspaceFolder}/TestResults/**/coverage.cobertura.xml",
+                "-targetdir:${workspaceFolder}/TestResults/ReportGenerator",
+                "--",
+                "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[*.Tests]*,[coverlet.*.tests?]*,[*]Coverlet.Core*,Program",
+                "-classfilters:-Program",
+                "-riskhotspotclassfilters:-Program",
+                "-assemblyfilters:-*.Tests;", //-Program; only way to fix at local. eKIBRA.Api.Tests ref eKIBRA.Workflow.Tests, because of that its capture twice.
+                /* "-verbosity:Warning", */
+                "-license:$REPORTGENERATOR_LICENSE"
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "dependsOn": [
+                "dotnet: test"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "dotnet: clean",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "clean",
+                "${workspaceFolder}/eKIBRA.sln",
+            ],
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "process",
+            "label": "dotnet: reformat",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            },        
+            "command": "dotnet",
+            "args": [
+                "format",
+                "--verify-no-chnages",
+                "--verbosity",
+                "d",
+                "${workspaceFolder}/eKIBRA.sln",
+            ],
+        }        
+    ]
+}

@@ -1,0 +1,37 @@
+﻿@using eKIBRA.Web.Pages.Shared
+@model string
+
+@if (!String.IsNullOrEmpty(Model))
+{
+    string statusMessageClass = "secondary";
+    string statusMessage = Model;
+    string success = MessageType.Success.ToString(),
+           info = MessageType.Info.ToString(),
+           warning = MessageType.Warning.ToString(),
+           error = MessageType.Error.ToString();
+
+    if (Model.StartsWith(success))
+    {
+        statusMessageClass = success.ToLower();
+        statusMessage = Model[success.Length..];
+    }
+    if (Model.StartsWith(info))
+    {
+        statusMessageClass = info.ToLower();
+        statusMessage = Model[info.Length..];
+    }
+    if (Model.StartsWith(warning))
+    {
+        statusMessageClass = warning.ToLower();
+        statusMessage = Model[warning.Length..];
+    }
+    if (Model.StartsWith(error))
+    {
+        statusMessageClass = "danger";
+        statusMessage = Model[error.Length..];
+    }
+    <div class="alert alert-@statusMessageClass alert-dismissible" role="alert">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        @statusMessage
+    </div>
+}

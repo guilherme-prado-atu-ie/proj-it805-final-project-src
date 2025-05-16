@@ -1,4 +1,4 @@
-﻿namespace eKIBRA.Web.Test
+﻿namespace eKIBRA.Web.Tests
 {
     [TestClass]
     public sealed class Test1
