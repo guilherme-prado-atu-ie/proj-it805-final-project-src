@@ -2,9 +2,11 @@
 name: Feature request
 about: Suggest new feature for this project
 type: Feature
-title: "[feat] -"
-labels: enhancement
-assignees: guilherme-prado-atu-ie
+title: "[Feature] -"
+labels: 
+	- feature
+assignees: 
+	- guilherme-prado-atu-ie
 
 ---
 
@@ -16,3 +18,10 @@ A clear and concise description of what the problem is.
 
 A clear and concise description of what you want to happen.
 
+## Tasks
+
+- [ ] Source Code
+- [ ] Unit-Test
+- [ ] Test Case
+- [ ] Document
+- [ ] Report
