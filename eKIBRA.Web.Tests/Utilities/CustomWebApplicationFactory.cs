@@ -1,19 +1,13 @@
 
 using System.Data.Common;
-using eKIBRA.Web;
 using eKIBRA.Web.Data;
+using eKIBRA.Web.Tests.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Data.Sqlite;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using eKIBRA.Web.Data;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Data.Sqlite;
-using eKIBRA.Web.Tests.Data;
 
 namespace eKIBRA.Web.Tests.Utilities
 {
@@ -42,7 +36,7 @@ namespace eKIBRA.Web.Tests.Utilities
                     services.Remove(dbConnectionDescriptor);
                 }
 
-                // Create open SqliteConnection so EF won't automatically close it.
+                // Create as Singleton and open a SqliteConnection so EF won't automatically close it.
                 services.AddSingleton<DbConnection>(container =>
                 {
 

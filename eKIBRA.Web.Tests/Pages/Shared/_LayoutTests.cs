@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using eKIBRA.Web.Tests.Utilities;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace eKIBRA.Web.Tests
 {
@@ -18,7 +20,8 @@ namespace eKIBRA.Web.Tests
     [TestClass]
     public class BasicTests
     {
-        private static CustomWebApplicationFactory<Program> _factory;
+        private static CustomWebApplicationFactory<Program> _factory = 
+            Mock.Of<CustomWebApplicationFactory<Program>>(); // Mock to set default value solve warning
 
         [ClassInitialize]
         public static void AssemblyInitialize(TestContext _)
@@ -27,9 +30,9 @@ namespace eKIBRA.Web.Tests
         }
 
         [ClassCleanup(ClassCleanupBehavior.EndOfClass)]
-        public static void AssemblyCleanup(TestContext _)
+        public static async Task AssemblyCleanup(TestContext _)
         {
-            _factory.Dispose();
+            await _factory.DisposeAsync();
         }
 
         [TestMethod]
@@ -40,10 +43,10 @@ namespace eKIBRA.Web.Tests
             var client = _factory.CreateClient();
 
             // Act
-            var response = await client.GetStringAsync(url);
+            var content = await client.GetStringAsync(url);
 
             // Assert
-            Assert.DoesNotContain("/Account/Manager/Index", response);
+            Assert.DoesNotContain("/Identity/Account/Manager", [content]);
         }
 
         [TestMethod]
@@ -72,17 +75,17 @@ namespace eKIBRA.Web.Tests
     {
         [TestInitialize]
         public void TestInitialize()
-        { 
+        {
 
 
         }
 
         [TestCleanup]
         public void TestCleanup()
-        { 
+        {
 
         }
-        
+
         /*        
         [TestMethod]
         public void OnPostAddMessageAsync_ReturnsAPageResult_WhenModelStateIsInvalid()

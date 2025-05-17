@@ -22,7 +22,7 @@ public class ApplicationDbContextTest : IdentityDbContext<ApplicationUser>
         builder.Entity<ApplicationUser>()
             .Property(e => e.IsDeleted);
     }
-    
+
     /* Entities */
     public override DbSet<ApplicationUser> Users { get; set; }
 }
