@@ -16,4 +16,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ApplicationUser>()
             .Property(e => e.IsDeleted);
     }
+
+    public override DbSet<ApplicationUser> Users { get; set; }
 }

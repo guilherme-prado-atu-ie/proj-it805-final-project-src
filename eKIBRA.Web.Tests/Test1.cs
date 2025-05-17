@@ -6,7 +6,14 @@
         [TestMethod]
         public void TestMethod1()
         {
-            Assert.IsTrue(true);
+            // Arrange
+            int expected = 5;
+
+            // Act
+            int actual = 2 + 3;
+
+            // Assert
+            Assert.AreEqual(expected, actual);
         }
     }
 }

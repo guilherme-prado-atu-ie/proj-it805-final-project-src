@@ -53,7 +53,7 @@
                 "kind": "build",
                 "isDefault": false
             },
-            "problemMatcher": "$msCompile",
+            "problemMatcher": "$msCompile"
         },
         {
             "label": "dotnet: watch",
@@ -87,7 +87,10 @@
                 "./TestResults/ReportGenerator",
                 "--collect:\"XPlat Code Coverage\"",
                 "--",
-                "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura",
+                "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura"
+            ],
+            "dependsOn": [
+                "dotnet: build"
             ],
             "presentation": {
                 "reveal": "silent"
@@ -98,7 +101,6 @@
             },
             "problemMatcher": "$msCompile"
         },
-        /* dotnet test --collect:"XPlat Code Coverage" --settings coverlet.runsettings */
         {
             "label": "dotnet: coverage-report",
             "command": "reportgenerator",
@@ -110,9 +112,7 @@
                 "DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Exclude=[*.Tests]*,[coverlet.*.tests?]*,[*]Coverlet.Core*,Program",
                 "-classfilters:-Program",
                 "-riskhotspotclassfilters:-Program",
-                "-assemblyfilters:-*.Tests;", //-Program; only way to fix at local. eKIBRA.Api.Tests ref eKIBRA.Workflow.Tests, because of that its capture twice.
-                /* "-verbosity:Warning", */
-                "-license:$REPORTGENERATOR_LICENSE"
+                "-assemblyfilters:-*.Tests;"
             ],
             "presentation": {
                 "reveal": "silent"
@@ -128,7 +128,7 @@
             "type": "process",
             "args": [
                 "clean",
-                "${workspaceFolder}/eKIBRA.sln",
+                "${workspaceFolder}/eKIBRA.sln"
             ],
             "presentation": {
                 "reveal": "silent"
@@ -136,23 +136,23 @@
             "problemMatcher": "$msCompile"
         },
         {
+            "label": "dotnet: format",
+            "command": "dotnet",
             "type": "process",
-            "label": "dotnet: reformat",
             "presentation": {
                 "reveal": "silent"
             },
             "group": {
-                "kind": "none",
-                "isDefault": true
-            },        
-            "command": "dotnet",
+                "kind": "test",
+                "isDefault": false
+            },
             "args": [
                 "format",
-                "--verify-no-chnages",
                 "--verbosity",
                 "d",
-                "${workspaceFolder}/eKIBRA.sln",
+                "${workspaceFolder}/eKIBRA.sln"
             ],
-        }        
+            "problemMatcher": []
+        }
     ]
 }
