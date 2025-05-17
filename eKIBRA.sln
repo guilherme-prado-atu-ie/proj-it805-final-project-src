@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35931.197 d17.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eKIBRA.Web", "eKIBRA.Web\eKIBRA.Web.csproj", "{11DA86EE-86DA-96C8-DDB3-DB2A40F4EA3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eKIBRA.Web.Test", "eKIBRA.Web.Test\eKIBRA.Web.Test.csproj", "{EF4C8D22-DE6B-41C4-8733-D592AEC2BD41}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "eKIBRA.Web.Tests", "eKIBRA.Web.Tests\eKIBRA.Web.Tests.csproj", "{EF4C8D22-DE6B-41C4-8733-D592AEC2BD41}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
