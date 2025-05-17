@@ -20,7 +20,7 @@ namespace eKIBRA.Web.Tests
     [TestClass]
     public class BasicTests
     {
-        private static CustomWebApplicationFactory<Program> _factory = 
+        private static CustomWebApplicationFactory<Program> _factory =
             Mock.Of<CustomWebApplicationFactory<Program>>(); // Mock to set default value solve warning
 
         [ClassInitialize]
