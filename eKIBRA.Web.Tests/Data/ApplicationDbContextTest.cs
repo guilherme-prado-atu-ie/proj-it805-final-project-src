@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using eKIBRA.Web.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Data.Sqlite;
@@ -19,10 +20,14 @@ public class ApplicationDbContextTest : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
+        /* ApplicationUser */
         builder.Entity<ApplicationUser>()
             .Property(e => e.IsDeleted);
     }
 
     /* Entities */
     public override DbSet<ApplicationUser> Users { get; set; }
+
+    public DbSet<Deck> Decks { get; set; }
+    public DbSet<Flashcard> Flashcards { get; set; }
 }
