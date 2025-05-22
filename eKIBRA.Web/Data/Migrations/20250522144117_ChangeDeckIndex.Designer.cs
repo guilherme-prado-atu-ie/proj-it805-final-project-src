@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eKIBRA.Web.Data;
 
@@ -11,9 +12,11 @@ using eKIBRA.Web.Data;
 namespace eKIBRA.Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250522144117_ChangeDeckIndex")]
+    partial class ChangeDeckIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,8 +233,6 @@ namespace eKIBRA.Web.Data.Migrations
             modelBuilder.Entity("eKIBRA.Web.Data.Deck", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(450)
-                        .IsUnicode(true)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Created")
@@ -263,8 +264,11 @@ namespace eKIBRA.Web.Data.Migrations
 
                     b.HasIndex("ModifierUserId");
 
-                    b.HasIndex("UserId", "Title")
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Title", "UserId")
                         .IsUnique()
+                        .HasDatabaseName("DeckTitle")
                         .HasFilter("[Title] IS NOT NULL");
 
                     b.ToTable("Decks");
@@ -273,8 +277,6 @@ namespace eKIBRA.Web.Data.Migrations
             modelBuilder.Entity("eKIBRA.Web.Data.Flashcard", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(450)
-                        .IsUnicode(true)
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Answer")
@@ -316,9 +318,12 @@ namespace eKIBRA.Web.Data.Migrations
 
                     b.HasIndex("ModifierUserId");
 
-                    b.HasIndex("UserId", "DeckId", "Question")
+                    b.HasIndex("Question")
                         .IsUnique()
+                        .HasDatabaseName("QuestionText")
                         .HasFilter("[Question] IS NOT NULL");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Flashcards");
                 });

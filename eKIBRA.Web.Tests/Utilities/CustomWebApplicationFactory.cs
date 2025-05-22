@@ -37,38 +37,8 @@ namespace eKIBRA.Web.Tests.Utilities
                 }
 
                 // Create as Singleton and open a SqliteConnection so EF won't automatically close it.
-                services.AddSingleton<DbConnection>(container =>
+                services.AddSingleton<DbConnection>(_ =>
                 {
-
-                    /* 
-                    var connectionBuilder = new SqliteConnectionStringBuilder()
-                    {
-                        //DataSource = dataSource,
-                        Mode = SqliteOpenMode.Memory,
-                        Cache = SqliteCacheMode.Shared,
-                        ForeignKeys = false,
-                        RecursiveTriggers = true,
-                        Password = string.Empty,
-                        Pooling = true
-                    };
-
-                    // Create a new service provider to create a new SQLite database.
-                    var serviceProvider = new ServiceCollection()
-                    .AddDbContext<ApplicationDbContextTest>(options =>
-                    {
-                        options.UseSqlite(connectionBuilder.ToString());
-                        options.EnableSensitiveDataLogging();
-                    })
-                    .BuildServiceProvider();
-
-                    // Create a new options instance using an SQLite database and 
-                    // IServiceProvider that the context should resolve all of its 
-                    // services from.
-                    var builder = new DbContextOptionsBuilder<ApplicationDbContextTest>()
-                        .UseSqlite()
-                        .UseInternalServiceProvider(serviceProvider);
-                    */
-
                     var connection = new SqliteConnection("DataSource=:memory:");
                     connection.Open();
 

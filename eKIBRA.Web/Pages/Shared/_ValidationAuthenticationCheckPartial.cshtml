@@ -1,6 +1,14 @@
-﻿@inject SignInManager<ApplicationUser> SignInManager
+﻿@using Microsoft.AspNetCore.Mvc.RazorPages
+@inject SignInManager<ApplicationUser> SignInManager
 @if (!SignInManager.IsSignedIn(User))
 {
-    // force a index redirect of logged out users
-    Context.Response.Redirect("/Index");
+    /*
+     * force a redirect to index when a user
+     * is not logged
+     * - fix issues with the browser cache
+     * - for cases that the backend too simple
+     *   to implement the checks
+     */
+    // Context.Response.Redirect("/Index");
+    Context.Response.Redirect("/Identity/Account/Login");
 }

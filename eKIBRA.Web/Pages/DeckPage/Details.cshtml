@@ -1,0 +1,56 @@
+@page
+@model eKIBRA.Web.Pages.DeckPage.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<partial name="_ValidationAuthenticationCheckPartial" />
+
+<h4>Deck Details</h4>
+
+<partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
+
+@{ if (string.IsNullOrWhiteSpace(Model.Input?.Id)) return; }
+
+<p>
+    <a asp-page="./Create">Create New</a> |
+    <a asp-page="./Edit" asp-route-id="@Model.Input.Id">Edit</a> |
+    <a asp-page="./Delete" asp-route-id="@Model.Input.Id">Delete</a> |
+    <a asp-page="./Index">Back to List</a>
+</p>
+<hr />
+<div>
+    <dl class="row">
+    <dt class="col-sm-2">
+        Title
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Input.Title)
+    </dd>
+    <dt class="col-sm-2">
+        Description
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Input.Description)
+    </dd>
+    <dt class="col-sm-2">
+        Created
+    </dt>
+    <dd class="col-sm-10">
+        @Model.Input.Created.ToString("dd.MMM.yyyy HH:mm")
+    </dd>
+    <dt class="col-sm-2">
+        Modified
+    </dt>
+    <dd class="col-sm-10">
+        @Model.Input.Modified?.ToString("dd.MMM.yyyy HH:mm")
+    </dd>
+    <dt class="col-sm-2">
+        Id
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Input.Id)
+    </dd>
+</dl>
+</div>
