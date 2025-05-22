@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasKey(k => k.Id);
 
         builder.Entity<Deck>()
+            .Property(p => p.Id)
+            .IsUnicode()
+            .HasMaxLength(450);
+        
+        builder.Entity<Deck>()
             .Property(p => p.IsDeleted);
 
         builder.Entity<Deck>()
@@ -50,12 +56,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasMany(e => e.Flashcards)
             .WithOne(e => e.LinkedDeck)
             .HasForeignKey(f => f.DeckId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.Entity<Deck>()
-            .HasIndex(i => i.Title)
+            .HasIndex(i => new { i.UserId, i.Title })
             .IsUnique()
-            .HasDatabaseName("DeckTitle")
             .HasFilter("[Title] IS NOT NULL");
 
         builder.Entity<Deck>()
@@ -69,8 +74,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(f => f.ModifierUserId)
             .OnDelete(DeleteBehavior.NoAction);
-
-
+        
+        builder.Entity<Deck>()
+            .HasQueryFilter(p => !p.IsDeleted);
+        
         #endregion
 
         #region Flashcard
@@ -78,8 +85,14 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Flashcard>()
             .HasKey(k => k.Id);
         builder.Entity<Flashcard>()
+            .Property(p => p.Id)
+            .IsUnicode()
+            .HasMaxLength(450);
+        
+        builder.Entity<Flashcard>()
             .Property(k => k.UserId)
             .HasMaxLength(450);
+        
         builder.Entity<Flashcard>()
             .Property(p => p.Question);
         builder.Entity<Flashcard>()
@@ -97,9 +110,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .Property(p => p.IsDeleted);
 
         builder.Entity<Flashcard>()
-            .HasIndex(i => i.Question)
+            .HasIndex(i => new { i.UserId, i.DeckId, i.Question })
             .IsUnique()
-            .HasDatabaseName("QuestionText")
             .HasFilter("[Question] IS NOT NULL");
 
         builder.Entity<Flashcard>()
@@ -113,6 +125,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(f => f.ModifierUserId)
             .OnDelete(DeleteBehavior.NoAction);
+        
+        builder.Entity<Flashcard>()
+            .HasQueryFilter(p => !p.IsDeleted);
 
         #endregion
     }

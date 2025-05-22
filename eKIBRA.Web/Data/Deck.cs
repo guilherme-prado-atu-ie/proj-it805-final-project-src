@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace eKIBRA.Web.Data
 {
     public class Deck
@@ -10,7 +12,7 @@ namespace eKIBRA.Web.Data
         public virtual DateTime? Modified { get; set; }
         public virtual string? ModifierUserId { get; set; }
         public virtual bool IsDeleted { get; set; }
-        public virtual required List<Flashcard> Flashcards { get; set; } = [];
+        public virtual List<Flashcard> Flashcards { get; set; } = [];
         public virtual ApplicationUser? User { get; set; }
         public virtual ApplicationUser? ModifierUser { get; set; }
     }

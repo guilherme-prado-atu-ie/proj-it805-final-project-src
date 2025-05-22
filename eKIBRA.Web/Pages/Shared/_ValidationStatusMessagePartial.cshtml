@@ -1,14 +1,13 @@
-﻿@using eKIBRA.Web.Pages.Shared
-@model string
+﻿@model string
 
-@if (!String.IsNullOrEmpty(Model))
+@if (!string.IsNullOrEmpty(Model))
 {
-    string statusMessageClass = "secondary";
-    string statusMessage = Model;
-    string success = MessageType.Success.ToString(),
-           info = MessageType.Info.ToString(),
-           warning = MessageType.Warning.ToString(),
-           error = MessageType.Error.ToString();
+    var statusMessageClass = "secondary";
+    var statusMessage = Model;
+    const string success = nameof(MessageType.Success);
+    const string info = nameof(MessageType.Info);
+    const string warning = nameof(MessageType.Warning);
+    const string error = nameof(MessageType.Error);
 
     if (Model.StartsWith(success))
     {

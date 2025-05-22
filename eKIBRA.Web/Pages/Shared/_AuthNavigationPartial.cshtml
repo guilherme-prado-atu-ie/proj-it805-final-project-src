@@ -3,7 +3,10 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="" asp-page="/">Decks</a>
+            <a class="nav-link text-dark" asp-area="" asp-page="/DeckPage/Index">Decks</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="" asp-page="/FlashcardPage/Index">Flashcards</a>
         </li>
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area="" asp-page="/">Study</a>
