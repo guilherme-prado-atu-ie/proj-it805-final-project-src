@@ -17,18 +17,18 @@ namespace eKIBRA.Web.Pages.DeckPage
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
-        
+
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
         public IndexViewModel Data { get; set; } = new();
         public IndexViewModelFilter Filter { get; set; } = new();
-        
+
         private readonly int _pageSize;
 
         public IndexModel(
             ILogger<IndexModel> logger,
-            ApplicationDbContext context, 
-            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IConfiguration configuration)
         {
@@ -48,12 +48,12 @@ namespace eKIBRA.Web.Pages.DeckPage
             int? pageIndex)
         {
             StatusMessage = string.Empty;
-            
+
             // User authenticated - validation
             if (!_signin.IsSignedIn(User))
             {
                 RedirectToPage("/Account/Login", new { area = "Identity" });
-                Data.EntityList = new PaginatedList<Deck>([], 0,0 ,0);
+                Data.EntityList = new PaginatedList<Deck>([], 0, 0, 0);
                 return;
             }
             // User retrieve - validation
@@ -61,10 +61,10 @@ namespace eKIBRA.Web.Pages.DeckPage
             if (user is null)
             {
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
-                Data.EntityList = new PaginatedList<Deck>([], 0,0 ,0);
+                Data.EntityList = new PaginatedList<Deck>([], 0, 0, 0);
                 return;
             }
-            
+
             Filter.SortedBy = sortedBy;
             Filter.TitleSort = string.IsNullOrEmpty(sortedBy) ? "title_desc" : "";
             Filter.DescriptionSort = sortedBy == "Description" ? "description_desc" : "Description";
@@ -72,7 +72,7 @@ namespace eKIBRA.Web.Pages.DeckPage
             Filter.ModifiedSort = sortedBy == "Modified" ? "modified_desc" : "Modified";
 
             if (searchTitle?.Length > 0 || searchDescription?.Length > 0)
-            { 
+            {
                 pageIndex = 1;
             }
             else
@@ -86,18 +86,18 @@ namespace eKIBRA.Web.Pages.DeckPage
 
             var query = _context.Decks
                 .AsNoTracking()
-                .Where(q=>q.UserId == user.Id);
-            
+                .Where(q => q.UserId == user.Id);
+
             if (!string.IsNullOrEmpty(searchTitle))
             {
                 query = query.Where(q => q.Title.Contains(searchTitle));
             }
-            
+
             if (!string.IsNullOrEmpty(searchDescription))
             {
                 query = query.Where(q => q.Description != null && q.Description.Contains(searchDescription));
             }
-            
+
             query = sortedBy switch
             {
                 "Created" => query.OrderBy(q => q.Created),
@@ -105,14 +105,14 @@ namespace eKIBRA.Web.Pages.DeckPage
 
                 "Modified" => query.OrderBy(q => q.Modified),
                 "modified_desc" => query.OrderByDescending(q => q.Modified),
-                
+
                 "Description" => query.OrderBy(q => q.Description),
                 "description_desc" => query.OrderByDescending(q => q.Description),
 
                 "title_desc" => query.OrderByDescending(q => q.Title),
                 _ => query.OrderBy(q => q.Title),
             };
-            
+
             Data.EntityList = await PaginatedList<Deck>.CreateAsync(
                 query, pageIndex ?? 1, _pageSize);
         }

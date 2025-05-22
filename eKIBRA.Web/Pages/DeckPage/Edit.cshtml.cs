@@ -14,7 +14,7 @@ namespace eKIBRA.Web.Pages.DeckPage
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
-        
+
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
         [BindProperty]
@@ -22,8 +22,8 @@ namespace eKIBRA.Web.Pages.DeckPage
 
         public EditModel(
             ILogger<EditModel> logger,
-            ApplicationDbContext context, 
-            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
             _logger = logger;
@@ -35,10 +35,10 @@ namespace eKIBRA.Web.Pages.DeckPage
         public async Task<IActionResult> OnGetAsync(string? id)
         {
             StatusMessage = string.Empty;
-            
+
             if (id is null)
             {
-                StatusMessage = MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                 + "Required parameter [id] is missing.";
                 return Page();
             }
@@ -56,21 +56,26 @@ namespace eKIBRA.Web.Pages.DeckPage
             }
             var data = await _context.Decks
                 .AsNoTracking()
-                .Where(q => 
+                .Where(q =>
                     q.Id == id && q.UserId == user.Id)
-                .Select(s=> 
-                    new EditViewModel {
-                        Id = s.Id, Title = s.Title, Description = s.Description, 
-                        Created = s.Created, Modified = s.Modified})
+                .Select(s =>
+                    new EditViewModel
+                    {
+                        Id = s.Id,
+                        Title = s.Title,
+                        Description = s.Description,
+                        Created = s.Created,
+                        Modified = s.Modified
+                    })
                 .FirstOrDefaultAsync();
-            
+
             if (data is null)
             {
-                StatusMessage =  MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                  + "The record no longer exists.";
                 return Page();
             }
-            
+
             Input = data;
             return Page();
 
@@ -82,7 +87,7 @@ namespace eKIBRA.Web.Pages.DeckPage
         {
             if (!ModelState.IsValid)
             {
-                StatusMessage = MessageType.Error 
+                StatusMessage = MessageType.Error
                                 + "Invalid Deck. Check the required fields or try entering new values.";
                 return Page();
             }
@@ -98,22 +103,22 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var data = await _context.Decks
-                .FirstOrDefaultAsync(fd=> 
+                .FirstOrDefaultAsync(fd =>
                     fd.Id == Input.Id && fd.UserId == user.Id);
             if (data is null)
             {
-                StatusMessage =  MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                  + "The record no longer exists.";
                 return Page();
             }
-            
+
             data.Title = Input.Title;
             data.Description = Input.Description;
             data.Modified = DateTime.UtcNow;
             data.ModifierUserId = user.Id;
-            
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -122,7 +127,7 @@ namespace eKIBRA.Web.Pages.DeckPage
             catch (Exception e)
             {
                 return HandleCreateException(e);
-            } 
+            }
             /*
              * change the behavior to stay on the page
              * and notify the user the record was updated
@@ -133,8 +138,8 @@ namespace eKIBRA.Web.Pages.DeckPage
 
         public IActionResult HandleCreateException(Exception e)
         {
-            if (e is DbUpdateException 
-                && e.InnerException 
+            if (e is DbUpdateException
+                && e.InnerException
                     is SqlException { Number: 547 or 2601 or 2627 })
                 /*
                  * Cannot insert duplicate key row in object 'dbo.Decks' with unique index 'DeckTitle'.
@@ -149,7 +154,7 @@ namespace eKIBRA.Web.Pages.DeckPage
             else
                 StatusMessage = MessageType.Error
                                 + "Fail to update the existing Deck.";
-            
+
             _logger.LogError(e, "An error occurred while updating a Deck.");
             return Page();
         }

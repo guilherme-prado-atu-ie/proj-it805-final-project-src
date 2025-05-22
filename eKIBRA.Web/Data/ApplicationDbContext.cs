@@ -31,7 +31,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .Property(p => p.Id)
             .IsUnicode()
             .HasMaxLength(450);
-        
+
         builder.Entity<Deck>()
             .Property(p => p.IsDeleted);
 
@@ -74,10 +74,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(f => f.ModifierUserId)
             .OnDelete(DeleteBehavior.NoAction);
-        
+
         builder.Entity<Deck>()
             .HasQueryFilter(p => !p.IsDeleted);
-        
+
         #endregion
 
         #region Flashcard
@@ -88,11 +88,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .Property(p => p.Id)
             .IsUnicode()
             .HasMaxLength(450);
-        
+
         builder.Entity<Flashcard>()
             .Property(k => k.UserId)
             .HasMaxLength(450);
-        
+
         builder.Entity<Flashcard>()
             .Property(p => p.Question);
         builder.Entity<Flashcard>()
@@ -125,7 +125,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .WithMany()
             .HasForeignKey(f => f.ModifierUserId)
             .OnDelete(DeleteBehavior.NoAction);
-        
+
         builder.Entity<Flashcard>()
             .HasQueryFilter(p => !p.IsDeleted);
 

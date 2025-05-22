@@ -13,15 +13,15 @@ namespace eKIBRA.Web.Pages.DeckPage
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
-        
+
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
         public Deck Input { get; set; } = default!;
 
         public DetailsModel(
             ILogger<DetailsModel> logger,
-            ApplicationDbContext context, 
-            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
             _logger = logger;
@@ -33,10 +33,10 @@ namespace eKIBRA.Web.Pages.DeckPage
         public async Task<IActionResult> OnGetAsync(string? id)
         {
             StatusMessage = string.Empty;
-            
+
             if (id is null)
             {
-                StatusMessage = MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                 + "Required parameter [id] is missing.";
                 return Page();
             }
@@ -54,12 +54,12 @@ namespace eKIBRA.Web.Pages.DeckPage
             }
             var data = await _context.Decks
                 .AsNoTracking()
-                .FirstOrDefaultAsync(fd=> 
+                .FirstOrDefaultAsync(fd =>
                     fd.Id == id && fd.UserId == user.Id);
-            
+
             if (data is null)
             {
-                StatusMessage =  MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                  + "The record no longer exists.";
                 return Page();
             }

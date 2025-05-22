@@ -5,7 +5,7 @@ namespace eKIBRA.Web.Data
         public virtual required string Id { get; set; }
         public virtual required string DeckId { get; set; }
         public virtual required string UserId { get; set; }
-        public virtual required string Question { get; set; }           
+        public virtual required string Question { get; set; }
         public virtual required string Answer { get; set; }
         public virtual required List<string> Incorrects { get; set; } = [];
         public virtual required Deck LinkedDeck { get; set; }

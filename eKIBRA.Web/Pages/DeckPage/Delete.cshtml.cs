@@ -14,16 +14,16 @@ namespace eKIBRA.Web.Pages.DeckPage
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
-        
+
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
         [BindProperty]
         public Deck Input { get; set; } = null!;
-        
-        public DeleteModel(            
+
+        public DeleteModel(
             ILogger<DeleteModel> logger,
-            ApplicationDbContext context, 
-            UserManager<ApplicationUser> userManager, 
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
             _logger = logger;
@@ -35,14 +35,14 @@ namespace eKIBRA.Web.Pages.DeckPage
         public async Task<IActionResult> OnGetAsync(string? id)
         {
             StatusMessage = string.Empty;
-            
+
             if (id is null)
             {
-                StatusMessage = MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                 + "Required parameter [id] is missing.";
                 return Page();
             }
-            
+
             // User authenticated - validation
             if (!_signin.IsSignedIn(User))
             {
@@ -55,19 +55,19 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var data = await _context.Decks
                 .AsNoTracking()
-                .FirstOrDefaultAsync(fd => 
+                .FirstOrDefaultAsync(fd =>
                     fd.Id == id && fd.UserId == user.Id);
-            
+
             if (data is null)
             {
-                StatusMessage =  MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                  + "The record no longer exists.";
                 return Page();
             }
-            
+
             Input = data;
             return Page();
 
@@ -76,10 +76,10 @@ namespace eKIBRA.Web.Pages.DeckPage
         public async Task<IActionResult> OnPostAsync(string? id)
         {
             StatusMessage = string.Empty;
-            
+
             if (id is null)
             {
-                StatusMessage = MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                 + "Required parameter [id] is missing.";
                 return Page();
             }
@@ -95,18 +95,18 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var data = await _context.Decks
-                .Include(sq=> sq.Flashcards)
-                .FirstOrDefaultAsync(fd=> 
+                .Include(sq => sq.Flashcards)
+                .FirstOrDefaultAsync(fd =>
                     fd.Id == id && fd.UserId == user.Id);
             if (data is null)
             {
-                StatusMessage =  MessageType.Warning 
+                StatusMessage = MessageType.Warning
                                  + "The record no longer exists.";
                 return Page();
             }
-            
+
             foreach (var flashcard in data.Flashcards)
             {
                 // replacing the Question with a Guid to avoid duplicate key error for soft-deleted items
@@ -117,12 +117,12 @@ namespace eKIBRA.Web.Pages.DeckPage
             // replacing the title with a Guid to avoid duplicate key error for soft-deleted items
             data.Title = "Deleted " + data.Id;
             data.IsDeleted = true;
-            
+
             await _context.SaveChangesAsync();
 
             Input = null!;
-            
-            StatusMessage =  MessageType.Success 
+
+            StatusMessage = MessageType.Success
                              + "The record was removed successfully.";
             return Page();
         }
