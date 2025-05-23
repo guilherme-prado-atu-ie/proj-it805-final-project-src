@@ -19,7 +19,7 @@ public sealed class CreateTests
     private readonly Mock<SignInManager<ApplicationUser>> _mockSignInManager;
     private readonly ApplicationDbContext _context;
     private readonly CreateModel _pageModel;
-    
+
     public CreateTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -29,10 +29,10 @@ public sealed class CreateTests
 
         // Setup mocks
         _mockLogger = new Mock<ILogger<CreateModel>>();
-            
+
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
             Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-            
+
         _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             _mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
@@ -54,7 +54,7 @@ public sealed class CreateTests
         };
         _pageModel.PageContext = pageContext;
     }
-    
+
     [Fact]
     public void OnGet_WhenUserNotSignedIn_RedirectsToLogin()
     {
@@ -85,17 +85,17 @@ public sealed class CreateTests
         Assert.IsType<PageResult>(result);
         Assert.Equal(string.Empty, _pageModel.StatusMessage);
     }
-    
+
     [Fact]
     public async Task OnPostAsync_WhenModelStateInvalid_ReturnsPageWithErrorMessage()
     {
         // Arrange
-        _pageModel.Input = new CreateViewModel 
-        { 
-            Title = "Valid Title", 
-            Description = "Valid Description" 
+        _pageModel.Input = new CreateViewModel
+        {
+            Title = "Valid Title",
+            Description = "Valid Description"
         };
-    
+
         // Manually add model state errors to simulate validation failures
         _pageModel.ModelState.AddModelError("Title", "Title is required");
         _pageModel.ModelState.AddModelError("Description", "Description must be at least 10 characters");
@@ -107,12 +107,12 @@ public sealed class CreateTests
         Assert.IsType<PageResult>(result);
         Assert.Contains("Invalid Deck. Check the required fields or try entering new values.", _pageModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageModel.StatusMessage);
-    
+
         // Verify that no database operations were performed
         var deckCount = await _context.Decks.CountAsync();
         Assert.Equal(0, deckCount);
     }
-    
+
     [Fact]
     public async Task OnPostAsync_WhenUserNotSignedIn_RedirectsToLogin()
     {
@@ -128,7 +128,7 @@ public sealed class CreateTests
         var redirectResult = Assert.IsType<RedirectToPageResult>(result);
         Assert.Equal("/Account/Login", redirectResult.PageName);
     }
-    
+
     [Fact]
     public async Task OnPostAsync_WhenUserNotFound_ReturnsPageWithErrorMessage()
     {
@@ -147,7 +147,7 @@ public sealed class CreateTests
         Assert.Contains("Your account was not found", _pageModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageModel.StatusMessage);
     }
-    
+
     [Fact]
     public async Task OnPostAsync_WhenValidInput_CreatesDeckAndReturnsSuccessMessage()
     {
@@ -165,10 +165,10 @@ public sealed class CreateTests
         _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
             .ReturnsAsync(testUser);
 
-        _pageModel.Input = new CreateViewModel 
-        { 
-            Title = "Test Deck", 
-            Description = "Test Description" 
+        _pageModel.Input = new CreateViewModel
+        {
+            Title = "Test Deck",
+            Description = "Test Description"
         };
 
         // Act
