@@ -57,7 +57,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
 
             var data = await _context.Flashcards
                 .AsNoTracking()
-                .Include(i=>i.LinkedDeck)
+                .Include(i => i.LinkedDeck)
                 .FirstOrDefaultAsync(fd =>
                     fd.Id == id && fd.UserId == user.Id);
 

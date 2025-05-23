@@ -115,7 +115,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(i => new { i.UserId, i.DeckId, i.Question })
             .IsUnique()
             .HasFilter("[Question] IS NOT NULL");
-        
+
         builder.Entity<Flashcard>()
             .HasOne(e => e.LinkedDeck);
 

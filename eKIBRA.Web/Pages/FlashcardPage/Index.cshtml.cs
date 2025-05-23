@@ -106,7 +106,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
 
                 "question" => query.OrderBy(q => q.Question),
                 "question_desc" => query.OrderByDescending(q => q.Question),
-                
+
                 "answer" => query.OrderBy(q => q.Answer),
                 "answer_desc" => query.OrderByDescending(q => q.Answer),
 

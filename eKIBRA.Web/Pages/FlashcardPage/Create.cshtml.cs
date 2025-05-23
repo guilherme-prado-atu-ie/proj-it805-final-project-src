@@ -21,7 +21,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
         public string StatusMessage { get; set; } = string.Empty;
 
         [BindProperty]
-        public CreateViewModel Input { get; set; } = new(){ DeckTitle = string.Empty };
+        public CreateViewModel Input { get; set; } = new() { DeckTitle = string.Empty };
 
         public CreateModel(
             ILogger<CreateModel> logger,
@@ -61,17 +61,17 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             }
             var query = await _context.Decks
                 .AsNoTracking()
-                .Where(q => 
-                    q.UserId == user.Id 
+                .Where(q =>
+                    q.UserId == user.Id
                     && q.Title.Contains(search))
-                .Select(s=> new {Title = s.Title, Display = s.Title, Value = s.Id})
-                .OrderBy(o=> o.Title)
+                .Select(s => new { Title = s.Title, Display = s.Title, Value = s.Id })
+                .OrderBy(o => o.Title)
                 .ToListAsync();
 
             var json = JsonSerializer.Serialize(query);
             return new JsonResult(json);
         }
-        
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -93,11 +93,11 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 return Page();
             }
 
-            var incorrects = new []
+            var incorrects = new[]
                 { Input.IncorrectOne, Input.IncorrectTwo, Input.IncorrectThree, Input.IncorrectFour }
                 .Where(q => !string.IsNullOrWhiteSpace(q))
                 .ToList();
-            
+
             var data = new Flashcard
             {
                 Id = Guid.NewGuid()

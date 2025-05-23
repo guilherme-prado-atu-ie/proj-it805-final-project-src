@@ -32,7 +32,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             _user = userManager;
             _signin = signInManager;
         }
-        
+
         public async Task<IActionResult> OnGetSearchDeckAsync(string search)
         {
             // User authenticated - validation
@@ -49,11 +49,11 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             }
             var query = await _context.Decks
                 .AsNoTracking()
-                .Where(q => 
-                    q.UserId == user.Id 
+                .Where(q =>
+                    q.UserId == user.Id
                     && q.Title.Contains(search))
-                .Select(s=> new {Title = s.Title, Display = s.Title, Value = s.Id})
-                .OrderBy(o=> o.Title)
+                .Select(s => new { Title = s.Title, Display = s.Title, Value = s.Id })
+                .OrderBy(o => o.Title)
                 .ToListAsync();
 
             var json = JsonSerializer.Serialize(query);
@@ -84,7 +84,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             }
             var data = await _context.Flashcards
                 .AsNoTracking()
-                .Include(i=> i.LinkedDeck)
+                .Include(i => i.LinkedDeck)
                 .Where(q =>
                     q.Id == id && q.UserId == user.Id)
                 .Select(s =>
