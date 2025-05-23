@@ -1,0 +1,64 @@
+@page
+@model eKIBRA.Web.Pages.FlashcardPage.CreateModel
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h4>Create a Flashcard</h4>
+<p>
+    <a asp-page="Index">Back to List</a>
+</p>
+<hr />
+
+<partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
+    
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.DeckTitle" class="form-control" autocomplete="off" placeholder=""/>
+                <label asp-for="Input.DeckTitle"></label>
+                <select multiple asp-for="Input.DeckTitle" class="form-select h-auto"
+                        style="display: none;" placeholder=""></select>
+                <input asp-for="Input.DeckId" type="hidden" />
+                <span asp-validation-for="Input.DeckTitle" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Input.Question" class="form-control" placeholder="" ></textarea>
+                <label asp-for="Input.Question" class="control-label"></label>
+                <span asp-validation-for="Input.Question" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Input.Anwser" class="form-control" placeholder=""></textarea>
+                <label asp-for="Input.Anwser" class="control-label"></label>
+                <span asp-validation-for="Input.Anwser" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Input.IncorrectOne" class="form-control" placeholder=""></textarea>
+                <label asp-for="Input.IncorrectOne" class="control-label"></label>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Input.IncorrectTwo" class="form-control" placeholder=""></textarea>
+                <label asp-for="Input.IncorrectTwo" class="control-label"></label>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Input.IncorrectThree" class="form-control" placeholder=""></textarea>
+                <label asp-for="Input.IncorrectThree" class="control-label"></label>
+            </div>
+            <div class="form-floating mb-3">
+                <textarea asp-for="Input.IncorrectFour" class="form-control" placeholder=""></textarea>
+                <label asp-for="Input.IncorrectFour" class="control-label"></label>
+            </div>
+            <button id="save-book-button" type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        eKIBRA.addAutoCompleteEvents({ 
+            inputAspFor: "Input.DeckTitle", inputAspForHidden: "Input.DeckId", handlerName: "SearchDeck" });
+    </script>
+}

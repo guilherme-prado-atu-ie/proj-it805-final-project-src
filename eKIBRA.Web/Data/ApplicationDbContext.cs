@@ -94,9 +94,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasMaxLength(450);
 
         builder.Entity<Flashcard>()
-            .Property(p => p.Question);
+            .Property(p => p.Question)
+            .HasMaxLength(4000);
         builder.Entity<Flashcard>()
-            .Property(p => p.Answer);
+            .Property(p => p.Answer)
+            .HasMaxLength(4000);
         builder.Entity<Flashcard>()
             .Property(p => p.Incorrects)
             .HasConversion(
@@ -113,6 +115,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
             .HasIndex(i => new { i.UserId, i.DeckId, i.Question })
             .IsUnique()
             .HasFilter("[Question] IS NOT NULL");
+        
+        builder.Entity<Flashcard>()
+            .HasOne(e => e.LinkedDeck);
 
         builder.Entity<Flashcard>()
             .HasOne(e => e.User)
