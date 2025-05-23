@@ -56,3 +56,4 @@ nunit-*.xml
 # IDE
 .vs
 .idea
+*.DotSettings.user

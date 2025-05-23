@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace eKIBRA.Web.Pages.DeckPage
+namespace eKIBRA.Web.Pages.FlashcardPage
 {
     public class IndexModel : PageModel
     {
@@ -38,9 +38,9 @@ namespace eKIBRA.Web.Pages.DeckPage
         public async Task OnGetAsync(
             string sortedBy,
             string titleFilter,
-            string descriptionFilter,
+            string questionFilter,
             string? searchTitle,
-            string? searchDescription,
+            string? searchQuestion,
             int? pageIndex)
         {
             StatusMessage = string.Empty;
@@ -49,7 +49,7 @@ namespace eKIBRA.Web.Pages.DeckPage
             if (!_signin.IsSignedIn(User))
             {
                 RedirectToPage("/Account/Login", new { area = "Identity" });
-                Data.EntityList = new PaginatedList<Deck>([], 0, 0, 0);
+                Data.EntityList = new PaginatedList<Flashcard>([], 0, 0, 0);
                 return;
             }
             // User retrieve - validation
@@ -57,59 +57,64 @@ namespace eKIBRA.Web.Pages.DeckPage
             if (user is null)
             {
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
-                Data.EntityList = new PaginatedList<Deck>([], 0, 0, 0);
+                Data.EntityList = new PaginatedList<Flashcard>([], 0, 0, 0);
                 return;
             }
 
             Filter.SortedBy = sortedBy;
             Filter.TitleSort = string.IsNullOrEmpty(sortedBy) ? "title_desc" : "";
-            Filter.DescriptionSort = sortedBy == "Description" ? "description_desc" : "Description";
-            Filter.CreatedSort = sortedBy == "Created" ? "created_desc" : "Created";
-            Filter.ModifiedSort = sortedBy == "Modified" ? "modified_desc" : "Modified";
+            Filter.QuestionSort = sortedBy == "question" ? "question_desc" : "question";
+            Filter.AnwserSort = sortedBy == "answer" ? "answer_desc" : "answer";
+            Filter.CreatedSort = sortedBy == "created" ? "created_desc" : "created";
+            Filter.ModifiedSort = sortedBy == "modified" ? "modified_desc" : "modified";
 
-            if (searchTitle?.Length > 0 || searchDescription?.Length > 0)
+            if (searchTitle?.Length > 0 || searchQuestion?.Length > 0)
             {
                 pageIndex = 1;
             }
             else
             {
                 searchTitle = titleFilter;
-                searchDescription = descriptionFilter;
+                searchQuestion = questionFilter;
             }
 
             Filter.TitleFilter = searchTitle;
-            Filter.DescriptionFilter = searchDescription;
+            Filter.QuestionFilter = searchQuestion;
 
-            var query = _context.Decks
+            var query = _context.Flashcards
                 .AsNoTracking()
+                .Include(q => q.LinkedDeck)
                 .Where(q => q.UserId == user.Id);
 
             if (!string.IsNullOrEmpty(searchTitle))
             {
-                query = query.Where(q => q.Title.Contains(searchTitle));
+                query = query.Where(q => q.LinkedDeck.Title.Contains(searchTitle));
             }
 
-            if (!string.IsNullOrEmpty(searchDescription))
+            if (!string.IsNullOrEmpty(searchQuestion))
             {
-                query = query.Where(q => q.Description != null && q.Description.Contains(searchDescription));
+                query = query.Where(q => q.Question.Contains(searchQuestion));
             }
 
             query = sortedBy switch
             {
-                "Created" => query.OrderBy(q => q.Created),
+                "created" => query.OrderBy(q => q.Created),
                 "created_desc" => query.OrderByDescending(q => q.Created),
 
-                "Modified" => query.OrderBy(q => q.Modified),
+                "modified" => query.OrderBy(q => q.Modified),
                 "modified_desc" => query.OrderByDescending(q => q.Modified),
 
-                "Description" => query.OrderBy(q => q.Description),
-                "description_desc" => query.OrderByDescending(q => q.Description),
+                "question" => query.OrderBy(q => q.Question),
+                "question_desc" => query.OrderByDescending(q => q.Question),
 
-                "title_desc" => query.OrderByDescending(q => q.Title),
-                _ => query.OrderBy(q => q.Title),
+                "answer" => query.OrderBy(q => q.Answer),
+                "answer_desc" => query.OrderByDescending(q => q.Answer),
+
+                "title_desc" => query.OrderByDescending(q => q.LinkedDeck.Title),
+                _ => query.OrderBy(q => q.LinkedDeck.Title),
             };
 
-            Data.EntityList = await PaginatedList<Deck>.CreateAsync(
+            Data.EntityList = await PaginatedList<Flashcard>.CreateAsync(
                 query, pageIndex ?? 1, _pageSize);
         }
     }
