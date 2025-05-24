@@ -1,5 +1,5 @@
 using eKIBRA.Web.Data;
-using eKIBRA.Web.Pages.DeckPage;
+using eKIBRA.Web.Pages.FlashcardPage;
 using eKIBRA.Web.Pages.Shared;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace eKIBRA.Web.UnitTests.Pages.DeckPage;
+namespace eKIBRA.Web.UnitTests.Pages.FlashcardPage;
 
 public sealed class ExceptionTests : IDisposable
 {
@@ -68,13 +68,12 @@ public sealed class ExceptionTests : IDisposable
         _pageEditModel.Input = new EditViewModel
         {
             Id = "test-deck-id",
-            Title = "Test Title"
+            DeckTitle = "Test Deck Title"
         };
 
         _pageCreateModel.Input = new CreateViewModel
         {
-            Title = "Test Title",
-            Description = "Test Description"
+            DeckTitle = "Test Deck Title"
         };
 
         // Act
@@ -83,11 +82,11 @@ public sealed class ExceptionTests : IDisposable
 
         // Assert
         Assert.IsType<PageResult>(editResult);
-        Assert.Contains("Fail to update the existing Deck", _pageEditModel.StatusMessage);
+        Assert.Contains("Fail to update the existing Flashcard", _pageEditModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageEditModel.StatusMessage);
 
         Assert.IsType<PageResult>(createResult);
-        Assert.Contains("Fail to create a new Deck", _pageCreateModel.StatusMessage);
+        Assert.Contains("Fail to create a new Flashcard", _pageCreateModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageCreateModel.StatusMessage);
     }
 
