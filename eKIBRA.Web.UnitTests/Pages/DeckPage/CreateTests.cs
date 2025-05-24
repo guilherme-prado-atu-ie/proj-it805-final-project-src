@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace eKIBRA.Web.UnitTests.Pages.DeckPage;
 
-public sealed class CreateTests
+public sealed class CreateTests : IDisposable
 {
     private readonly Mock<ILogger<CreateModel>> _mockLogger;
     private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
@@ -185,5 +185,10 @@ public sealed class CreateTests
         Assert.Equal("Test Deck", createdDeck.Title);
         Assert.Equal("Test Description", createdDeck.Description);
         Assert.Equal(testUser.Id, createdDeck.UserId);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
     }
 }
