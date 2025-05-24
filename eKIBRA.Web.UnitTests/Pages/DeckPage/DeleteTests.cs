@@ -21,7 +21,7 @@ public sealed class DeleteTests : IDisposable
     private readonly DeleteModel _pageModel;
     private readonly ApplicationUser _testUser;
     private readonly ApplicationUser _anotherUser;
-    
+
     public DeleteTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
@@ -31,16 +31,16 @@ public sealed class DeleteTests : IDisposable
 
         // Setup mocks
         _mockLogger = new Mock<ILogger<DeleteModel>>();
-            
+
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
             Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-            
+
         _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             _mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
             null, null, null, null);
-        
+
         // Create a test user
         _testUser = new ApplicationUser
         {
@@ -49,7 +49,7 @@ public sealed class DeleteTests : IDisposable
             Email = "testuser@example.com",
             IsDeleted = false
         };
-        
+
         _anotherUser = new ApplicationUser
         {
             Id = "another-user-id",
@@ -75,16 +75,16 @@ public sealed class DeleteTests : IDisposable
 
         SeedTestData();
     }
-    
+
     private void SeedTestData()
     {
-        
+
         var testDeck = new Deck
         {
             Id = "test-deck-id",
             UserId = _testUser.Id,
             User = _testUser,
-            Created =  DateTime.UtcNow,
+            Created = DateTime.UtcNow,
             Title = "Test Deck for Deletion",
             Description = "Test deck description",
             IsDeleted = false,
@@ -129,7 +129,7 @@ public sealed class DeleteTests : IDisposable
         _context.Decks.AddRange(testDeck, anotherUserDeck);
         _context.SaveChanges();
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenIdIsNull_ReturnsPageWithWarningMessage()
     {
@@ -141,7 +141,7 @@ public sealed class DeleteTests : IDisposable
         Assert.Contains("Required parameter [id] is missing", _pageModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenUserNotSignedIn_RedirectsToLogin()
     {
@@ -157,7 +157,7 @@ public sealed class DeleteTests : IDisposable
         Assert.Equal("/Account/Login", redirectResult.PageName);
         Assert.Equal("Identity", redirectResult.RouteValues?["area"]);
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenUserNotFound_ReturnsPageWithErrorMessage()
     {
@@ -175,7 +175,7 @@ public sealed class DeleteTests : IDisposable
         Assert.Contains("Your account was not found", _pageModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageModel.StatusMessage);
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenDeckNotFound_ReturnsPageWithWarningMessage()
     {
@@ -193,7 +193,7 @@ public sealed class DeleteTests : IDisposable
         Assert.Contains("The record no longer exists", _pageModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenDeckBelongsToAnotherUser_ReturnsPageWithWarningMessage()
     {
@@ -211,7 +211,7 @@ public sealed class DeleteTests : IDisposable
         Assert.Contains("The record no longer exists", _pageModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenValidRequest_ReturnsPageWithDeckData()
     {
@@ -232,166 +232,166 @@ public sealed class DeleteTests : IDisposable
         Assert.Equal("Test Deck for Deletion", _pageModel.Input.Title);
         Assert.Equal(_testUser.Id, _pageModel.Input.UserId);
     }
-    
+
     [Fact]
-        public async Task OnPostAsync_WhenIdIsNull_ReturnsPageWithWarningMessage()
+    public async Task OnPostAsync_WhenIdIsNull_ReturnsPageWithWarningMessage()
+    {
+        // Act
+        var result = await _pageModel.OnPostAsync(null);
+
+        // Assert
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("Required parameter [id] is missing", _pageModel.StatusMessage);
+        Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_WhenUserNotSignedIn_RedirectsToLogin()
+    {
+        // Arrange
+        _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
+                         .Returns(false);
+
+        // Act
+        var result = await _pageModel.OnPostAsync("test-deck-id");
+
+        // Assert
+        var redirectResult = Assert.IsType<RedirectToPageResult>(result);
+        Assert.Equal("/Account/Login", redirectResult.PageName);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_WhenUserNotFound_ReturnsPageWithErrorMessage()
+    {
+        // Arrange
+        _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
+                         .Returns(true);
+        _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                       .ReturnsAsync(null as ApplicationUser);
+
+        // Act
+        var result = await _pageModel.OnPostAsync("test-deck-id");
+
+        // Assert
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("Your account was not found", _pageModel.StatusMessage);
+        Assert.Contains(nameof(MessageType.Error), _pageModel.StatusMessage);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_WhenDeckNotFound_ReturnsPageWithWarningMessage()
+    {
+        // Arrange
+        _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
+                         .Returns(true);
+        _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                       .ReturnsAsync(_testUser);
+
+        // Act
+        var result = await _pageModel.OnPostAsync("nonexistent-deck-id");
+
+        // Assert
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("The record no longer exists", _pageModel.StatusMessage);
+        Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
+    }
+
+    // [Fact(Skip = "The post on the test is deleting the deck double check")]
+    // public async Task OnPostAsync_WhenValidRequest_SoftDeletesDeckAndFlashcards()
+    // {
+    //     // Arrange
+    //     _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
+    //                      .Returns(true);
+    //     _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+    //                    .ReturnsAsync(_testUser);
+    //
+    //     // Act
+    //     var result = await _pageModel.OnPostAsync("test-deck-id");
+    //
+    //     // Assert
+    //     Assert.IsType<PageResult>(result);
+    //     Assert.Contains("The record was removed successfully", _pageModel.StatusMessage);
+    //     Assert.Contains(nameof(MessageType.Success), _pageModel.StatusMessage);
+    //     Assert.Null(_pageModel.Input);
+    //
+    //     // Verify soft deletion in database
+    //     var deletedDeck = await _context.Decks
+    //         .Include(d => d.Flashcards)
+    //         .FirstOrDefaultAsync(d => d.Id == "test-deck-id");
+    //
+    //     Assert.NotNull(deletedDeck);
+    //     Assert.True(deletedDeck.IsDeleted);
+    //     Assert.StartsWith("Deleted ", deletedDeck.Title);
+    //     Assert.Contains("test-deck-id", deletedDeck.Title);
+    //
+    //     // Verify all flashcards are soft deleted
+    //     Assert.All(deletedDeck.Flashcards, flashcard =>
+    //     {
+    //         Assert.True(flashcard.IsDeleted);
+    //         Assert.StartsWith("Deleted ", flashcard.Question);
+    //         Assert.Contains(flashcard.Id, flashcard.Question);
+    //     });
+    // }
+
+    [Fact]
+    public async Task OnPostAsync_WhenDeckBelongsToAnotherUser_ReturnsPageWithWarningMessage()
+    {
+        // Arrange
+        _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
+                         .Returns(true);
+        _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                       .ReturnsAsync(_testUser);
+
+        // Act
+        var result = await _pageModel.OnPostAsync("another-deck-id");
+
+        // Assert
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("The record no longer exists", _pageModel.StatusMessage);
+        Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
+
+        // Verify the other user's deck was not modified
+        var otherUserDeck = await _context.Decks.FindAsync("another-deck-id");
+        Assert.NotNull(otherUserDeck);
+        Assert.False(otherUserDeck.IsDeleted);
+        Assert.Equal("Another User's Deck", otherUserDeck.Title);
+    }
+
+    [Fact]
+    public async Task OnPostAsync_WhenDeckHasNoFlashcards_DeletesOnlyDeck()
+    {
+        // Arrange
+        var deckWithoutFlashcards = new Deck
         {
-            // Act
-            var result = await _pageModel.OnPostAsync(null);
+            Id = "deck-no-flashcards",
+            UserId = _testUser.Id,
+            Title = "Deck Without Flashcards",
+            Description = "Test deck with no flashcards"
+        };
+        _context.Decks.Add(deckWithoutFlashcards);
+        await _context.SaveChangesAsync();
 
-            // Assert
-            Assert.IsType<PageResult>(result);
-            Assert.Contains("Required parameter [id] is missing", _pageModel.StatusMessage);
-            Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
-        }
+        _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
+                         .Returns(true);
+        _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
+                       .ReturnsAsync(_testUser);
 
-        [Fact]
-        public async Task OnPostAsync_WhenUserNotSignedIn_RedirectsToLogin()
-        {
-            // Arrange
-            _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
-                             .Returns(false);
+        // Act
+        var result = await _pageModel.OnPostAsync("deck-no-flashcards");
 
-            // Act
-            var result = await _pageModel.OnPostAsync("test-deck-id");
+        // Assert
+        Assert.IsType<PageResult>(result);
+        Assert.Contains("The record was removed successfully", _pageModel.StatusMessage);
 
-            // Assert
-            var redirectResult = Assert.IsType<RedirectToPageResult>(result);
-            Assert.Equal("/Account/Login", redirectResult.PageName);
-        }
+        // Verify deck is soft deleted
+        var deletedDeck = await _context.Decks.FindAsync("deck-no-flashcards");
+        Assert.NotNull(deletedDeck);
+        Assert.True(deletedDeck.IsDeleted);
+        Assert.StartsWith("Deleted ", deletedDeck.Title);
+    }
 
-        [Fact]
-        public async Task OnPostAsync_WhenUserNotFound_ReturnsPageWithErrorMessage()
-        {
-            // Arrange
-            _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
-                             .Returns(true);
-            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-                           .ReturnsAsync(null as ApplicationUser);
-
-            // Act
-            var result = await _pageModel.OnPostAsync("test-deck-id");
-
-            // Assert
-            Assert.IsType<PageResult>(result);
-            Assert.Contains("Your account was not found", _pageModel.StatusMessage);
-            Assert.Contains(nameof(MessageType.Error), _pageModel.StatusMessage);
-        }
-
-        [Fact]
-        public async Task OnPostAsync_WhenDeckNotFound_ReturnsPageWithWarningMessage()
-        {
-            // Arrange
-            _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
-                             .Returns(true);
-            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-                           .ReturnsAsync(_testUser);
-
-            // Act
-            var result = await _pageModel.OnPostAsync("nonexistent-deck-id");
-
-            // Assert
-            Assert.IsType<PageResult>(result);
-            Assert.Contains("The record no longer exists", _pageModel.StatusMessage);
-            Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
-        }
-
-        // [Fact(Skip = "The post on the test is deleting the deck double check")]
-        // public async Task OnPostAsync_WhenValidRequest_SoftDeletesDeckAndFlashcards()
-        // {
-        //     // Arrange
-        //     _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
-        //                      .Returns(true);
-        //     _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-        //                    .ReturnsAsync(_testUser);
-        //
-        //     // Act
-        //     var result = await _pageModel.OnPostAsync("test-deck-id");
-        //
-        //     // Assert
-        //     Assert.IsType<PageResult>(result);
-        //     Assert.Contains("The record was removed successfully", _pageModel.StatusMessage);
-        //     Assert.Contains(nameof(MessageType.Success), _pageModel.StatusMessage);
-        //     Assert.Null(_pageModel.Input);
-        //
-        //     // Verify soft deletion in database
-        //     var deletedDeck = await _context.Decks
-        //         .Include(d => d.Flashcards)
-        //         .FirstOrDefaultAsync(d => d.Id == "test-deck-id");
-        //
-        //     Assert.NotNull(deletedDeck);
-        //     Assert.True(deletedDeck.IsDeleted);
-        //     Assert.StartsWith("Deleted ", deletedDeck.Title);
-        //     Assert.Contains("test-deck-id", deletedDeck.Title);
-        //
-        //     // Verify all flashcards are soft deleted
-        //     Assert.All(deletedDeck.Flashcards, flashcard =>
-        //     {
-        //         Assert.True(flashcard.IsDeleted);
-        //         Assert.StartsWith("Deleted ", flashcard.Question);
-        //         Assert.Contains(flashcard.Id, flashcard.Question);
-        //     });
-        // }
-
-        [Fact]
-        public async Task OnPostAsync_WhenDeckBelongsToAnotherUser_ReturnsPageWithWarningMessage()
-        {
-            // Arrange
-            _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
-                             .Returns(true);
-            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-                           .ReturnsAsync(_testUser);
-
-            // Act
-            var result = await _pageModel.OnPostAsync("another-deck-id");
-
-            // Assert
-            Assert.IsType<PageResult>(result);
-            Assert.Contains("The record no longer exists", _pageModel.StatusMessage);
-            Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
-
-            // Verify the other user's deck was not modified
-            var otherUserDeck = await _context.Decks.FindAsync("another-deck-id");
-            Assert.NotNull(otherUserDeck);
-            Assert.False(otherUserDeck.IsDeleted);
-            Assert.Equal("Another User's Deck", otherUserDeck.Title);
-        }
-
-        [Fact]
-        public async Task OnPostAsync_WhenDeckHasNoFlashcards_DeletesOnlyDeck()
-        {
-            // Arrange
-            var deckWithoutFlashcards = new Deck
-            {
-                Id = "deck-no-flashcards",
-                UserId = _testUser.Id,
-                Title = "Deck Without Flashcards",
-                Description = "Test deck with no flashcards"
-            };
-            _context.Decks.Add(deckWithoutFlashcards);
-            await _context.SaveChangesAsync();
-
-            _mockSignInManager.Setup(x => x.IsSignedIn(It.IsAny<ClaimsPrincipal>()))
-                             .Returns(true);
-            _mockUserManager.Setup(x => x.GetUserAsync(It.IsAny<ClaimsPrincipal>()))
-                           .ReturnsAsync(_testUser);
-
-            // Act
-            var result = await _pageModel.OnPostAsync("deck-no-flashcards");
-
-            // Assert
-            Assert.IsType<PageResult>(result);
-            Assert.Contains("The record was removed successfully", _pageModel.StatusMessage);
-
-            // Verify deck is soft deleted
-            var deletedDeck = await _context.Decks.FindAsync("deck-no-flashcards");
-            Assert.NotNull(deletedDeck);
-            Assert.True(deletedDeck.IsDeleted);
-            Assert.StartsWith("Deleted ", deletedDeck.Title);
-        }
-
-        public void Dispose()
-        {
-            _context.Dispose();
-        }
+    public void Dispose()
+    {
+        _context.Dispose();
+    }
 }

@@ -203,7 +203,7 @@ public sealed class DetailsTest : IDisposable
         Assert.Contains(nameof(MessageType.Warning), _pageModel.StatusMessage);
         Assert.Null(_pageModel.Input); // Input should remain null when deck not found
     }
-    
+
     [Fact]
     public async Task OnGetAsync_WhenValidDeck_ReturnsPageWithDeckData()
     {
@@ -227,7 +227,7 @@ public sealed class DetailsTest : IDisposable
         Assert.True(_pageModel.Input.Created < DateTime.UtcNow);
         Assert.True(_pageModel.Input.Modified < DateTime.UtcNow);
     }
-    
+
     public void Dispose()
     {
         _context.Dispose();

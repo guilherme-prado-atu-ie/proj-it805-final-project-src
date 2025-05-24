@@ -50,11 +50,11 @@ public sealed class ExceptionTests : IDisposable
             _context,
             mockUserManager.Object,
             mockSignInManager.Object);
-        
+
         // Setup PageContext
         var httpContext = new DefaultHttpContext();
         var pageContext = new PageContext { HttpContext = httpContext };
-        
+
         _pageEditModel.PageContext = pageContext;
         _pageCreateModel.PageContext = pageContext;
     }
@@ -65,13 +65,13 @@ public sealed class ExceptionTests : IDisposable
     {
         // Arrange
         var genericException = new Exception("Generic error");
-        
+
         _pageEditModel.Input = new EditViewModel
         {
             Id = "test-deck-id",
             Title = "Test Title"
         };
-        
+
         _pageCreateModel.Input = new CreateViewModel
         {
             Title = "Test Title",
@@ -81,12 +81,12 @@ public sealed class ExceptionTests : IDisposable
         // Act
         var editResult = _pageEditModel.HandleCreateException(genericException);
         var createResult = _pageCreateModel.HandleCreateException(genericException);
-        
+
         // Assert
         Assert.IsType<PageResult>(editResult);
         Assert.Contains("Fail to update the existing Deck", _pageEditModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageEditModel.StatusMessage);
-        
+
         Assert.IsType<PageResult>(createResult);
         Assert.Contains("Fail to create a new Deck", _pageCreateModel.StatusMessage);
         Assert.Contains(nameof(MessageType.Error), _pageCreateModel.StatusMessage);
