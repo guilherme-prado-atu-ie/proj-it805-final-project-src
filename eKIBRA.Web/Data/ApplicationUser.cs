@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace eKIBRA.Web.Data
+namespace eKIBRA.Web.Data;
+
+public class ApplicationUser : IdentityUser
 {
-    public class ApplicationUser : IdentityUser
-    {
-        public virtual required bool IsDeleted { get; set; }
-    }
+    public virtual required bool IsDeleted { get; set; }
 }
