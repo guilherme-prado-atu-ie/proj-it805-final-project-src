@@ -3,25 +3,28 @@ using eKIBRA.Web.Pages.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace eKIBRA.Web.Pages.DeckPage
+namespace eKIBRA.Web.Pages.StudyPage
 {
-    public class EditModel : PageModel
+    public class CreateModel : PageModel
     {
-        private readonly ILogger<EditModel> _logger;
+        private readonly ILogger<CreateModel> _logger;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
 
+
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
-        [BindProperty]
-        public EditViewModel Input { get; set; } = null!;
 
-        public EditModel(
-            ILogger<EditModel> logger,
+        [BindProperty]
+        public CreateViewModel Input { get; set; } = new();
+
+        public CreateModel(
+            ILogger<CreateModel> logger,
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
@@ -32,17 +35,9 @@ namespace eKIBRA.Web.Pages.DeckPage
             _signin = signInManager;
         }
 
-        public async Task<IActionResult> OnGetAsync(string? id)
+        public async Task<IActionResult> OnGetAsync()
         {
             StatusMessage = string.Empty;
-
-            if (id is null)
-            {
-                StatusMessage = MessageType.Warning
-                                + "Required parameter [id] is missing.";
-                return Page();
-            }
-            // User authenticated - validation
             if (!_signin.IsSignedIn(User))
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -54,35 +49,30 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            var data = await _context.Decks
-                .AsNoTracking()
-                .Where(q =>
-                    q.Id == id && q.UserId == user.Id)
-                .Select(s =>
-                    new EditViewModel
-                    {
-                        Id = s.Id,
-                        Title = s.Title,
-                        Description = s.Description,
-                        Created = s.Created,
-                        Modified = s.Modified
-                    })
-                .FirstOrDefaultAsync();
-
-            if (data is null)
-            {
-                StatusMessage = MessageType.Warning
-                                 + "The record no longer exists.";
-                return Page();
-            }
-
-            Input = data;
+            // Retrieve available decks
+            RetrieveAvailableDecks(user);
             return Page();
-
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
+        private void RetrieveAvailableDecks(ApplicationUser user)
+        {
+            var studySessions = _context.StudySessions
+                .AsNoTracking()
+                .Where(q => 
+                    q.UserId == user.Id 
+                    && q.Status != StudySessionStatus.Completed)
+                .Select(s=> new { s.DeckId });
+            
+            var decks = _context.Decks
+                .AsNoTracking()
+                .Where(q => 
+                    q.UserId == user.Id
+                    && !studySessions
+                        .Any(s => s.DeckId == q.Id));
+            
+            ViewData["Decks"] = new SelectList(decks, "Id", "Title");
+        }
+
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -103,26 +93,34 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
+            // Check for existing Non-Completed Study Sessions
+            var hasNonCompleted = await _context.StudySessions
+                .AsNoTracking()
+                .AnyAsync(q=> 
+                    q.UserId == user.Id 
+                    && q.DeckId == Input.DeckId
+                    && q.Status != StudySessionStatus.Completed);
 
-            var data = await _context.Decks
-                .Where(q => q.Id == Input.Id && q.UserId == user.Id)
-                .FirstOrDefaultAsync();
-            if (data is null)
+            if (hasNonCompleted)
             {
                 StatusMessage = MessageType.Warning
-                                 + "The record no longer exists.";
+                                + "You have a non-completed Study Session. Please complete it before creating a new one.";
                 return Page();
             }
+            
+            var data = new StudySession
+            {
+                Id = Guid.NewGuid()
+                    .ToString(),
+                UserId = user.Id,
+                DeckId = Input.DeckId,
+                FlashcardsProgress = []
+            };
 
-            data.Title = Input.Title;
-            data.Description = Input.Description;
-            data.Modified = DateTime.UtcNow;
-            data.ModifierUserId = user.Id;
-
+            _context.StudySessions.Add(data);
             try
             {
                 await _context.SaveChangesAsync();
-                Input.Modified = data.Modified;
             }
             catch (Exception e)
             {
@@ -130,9 +128,9 @@ namespace eKIBRA.Web.Pages.DeckPage
             }
             /*
              * change the behavior to stay on the page
-             * and notify the user the record was updated
+             * and notify the user the record was created
              */
-            StatusMessage = MessageType.Success + "Deck updated.";
+            StatusMessage = MessageType.Success + "Deck created.";
             return Page();
         }
 
@@ -142,7 +140,7 @@ namespace eKIBRA.Web.Pages.DeckPage
                 && e.InnerException
                     is SqlException { Number: 547 or 2601 or 2627 })
                 /*
-                 * Cannot insert duplicate key row in object 'dbo.Decks' with unique index 'DeckTitle'.
+                 * Cannot insert a duplicate key row on 'dbo.StudySessions' because of a unique index.
                  * The duplicate key value is (deck 01).
                  *
                  * 547 - Constraint check violation
@@ -150,12 +148,12 @@ namespace eKIBRA.Web.Pages.DeckPage
                  * 2627 - Unique constraint error
                  */
                 StatusMessage = MessageType.Warning
-                                + $"Cannot update this Deck. Title '{Input.Title}' is duplicated.";
+                                + $"Cannot create a new Deck. Title '{Input.Description}' is duplicated.";
             else
                 StatusMessage = MessageType.Error
-                                + "Fail to update the existing Deck.";
+                                + "Fail to create a new Deck.";
 
-            _logger.LogError(e, "An error occurred while updating a Deck.");
+            _logger.LogError(e, "An error occurred while creating a new Deck.");
             return Page();
         }
     }

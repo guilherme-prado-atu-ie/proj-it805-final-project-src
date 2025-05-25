@@ -8,7 +8,7 @@ public class Flashcard
     public virtual required string Question { get; set; }
     public virtual required string Answer { get; set; }
     public virtual required List<string> Incorrects { get; set; } = [];
-    public virtual Deck? LinkedDeck { get; set; }
+    public virtual Deck LinkedDeck { get; set; }
     public virtual DateTime Created { get; set; } = DateTime.UtcNow;
     public virtual DateTime? Modified { get; set; }
     public virtual string? ModifierUserId { get; set; }

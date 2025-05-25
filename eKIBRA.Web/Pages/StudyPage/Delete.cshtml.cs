@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace eKIBRA.Web.Pages.DeckPage
+namespace eKIBRA.Web.Pages.StudyPage
 {
     public class DeleteModel : PageModel
     {
@@ -18,7 +18,7 @@ namespace eKIBRA.Web.Pages.DeckPage
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
         [BindProperty]
-        public Deck Input { get; set; } = null!;
+        public StudySession Input { get; set; } = null!;
 
         public DeleteModel(
             ILogger<DeleteModel> logger,
@@ -55,10 +55,11 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-
-            var data = await _context.Decks
+            
+            var data = await _context.StudySessions
                 .AsNoTracking()
-                .Where(q => q.Id == id && q.UserId == user.Id)
+                .Include(sq=> sq.LinkedDeck)
+                .Where(q=> q.Id == id && q.UserId == user.Id)
                 .FirstOrDefaultAsync();
 
             if (data is null)
@@ -96,10 +97,11 @@ namespace eKIBRA.Web.Pages.DeckPage
                 return Page();
             }
 
-            var data = await _context.Decks
-                .Include(sq => sq.Flashcards)
-                .Where(q => q.Id == id && q.UserId == user.Id)
-                .FirstOrDefaultAsync();
+            var data = await _context.StudySessions
+                .Include(sq => sq.LinkedDeck)
+                .Include(sq => sq.FlashcardsProgress)
+                .FirstOrDefaultAsync(fd =>
+                    fd.Id == id && fd.UserId == user.Id);
             if (data is null)
             {
                 StatusMessage = MessageType.Warning
@@ -107,15 +109,14 @@ namespace eKIBRA.Web.Pages.DeckPage
                 return Page();
             }
 
-            foreach (var flashcard in data.Flashcards)
+            foreach (var item in data.FlashcardsProgress)
             {
-                // replacing the Question with a Guid to avoid duplicate key error for soft-deleted items
-                flashcard.Question = "Deleted " + flashcard.Id;
-                flashcard.IsDeleted = true;
+                // updating IsDeleted to soft-deleted items
+                item.IsDeleted = true;
             }
 
-            // replacing the title with a Guid to avoid duplicate key error for soft-deleted items
-            data.Title = "Deleted " + data.Id;
+            // updating Status and IsDeleted soft-deleted items
+            data.Status = StudySessionStatus.Completed;
             data.IsDeleted = true;
 
             await _context.SaveChangesAsync();
