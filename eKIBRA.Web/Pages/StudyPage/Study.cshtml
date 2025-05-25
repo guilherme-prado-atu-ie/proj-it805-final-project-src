@@ -26,27 +26,6 @@
 }
 
 <div class="row align-items-center">
-    <div class="col">
-        <form asp-page="./Study" method="get">
-            <div class="row align-items-center">
-                <div class="col-md-4">
-                    <input asp-for="@Model.Filter.TitleFilter" class="form-control" autocomplete="off" 
-                           placeholder="Title" name="searchTitle" value="@Model.Filter.TitleFilter" />
-                </div>
-                <div class="col-auto">
-                    <select asp-for="@Model.Filter.StatusFilter" class="form-control"
-                            asp-items="Html.GetEnumSelectList<StudySessionStatus>()"
-                            placeholder="Status" name="searchStatus" >
-                        <option value="">Select a value</option>
-                    </select>
-                </div>
-                <div class="col">
-                    <input type="submit" value="Filter" class="btn btn-primary" />
-                </div>
-            </div>
-        </form>
-    </div>
-
     <div class="col-md-auto">
         <a asp-page="./Study"
            asp-route-id="@Model.Input.StudySessionId"
@@ -73,8 +52,42 @@
 </div>
 <br />
 
-!!! add content here !!!
+<div class="table-responsive">
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>
+                <h5>
+                    @Html.DisplayNameFor(model => model.Input.LinkedDeck.Title)    
+                </h5>
+            </th>
+        </tr>
+        <tr>
+            <th>
+                <h1>@Model.Input.LinkedFlashcard.Question</h1>
+            </th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+    <tr>
+        <td>
+            <h1>@Model.Input.LinkedFlashcard.Answer</h1>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        </tr>
+    <td>
+    </tbody>
+</table>
+</div>
 
+
+
+
+
+
+<br />
 <div class="row align-items-center">
     <div class="col"></div>
     <div class="col-md-auto">

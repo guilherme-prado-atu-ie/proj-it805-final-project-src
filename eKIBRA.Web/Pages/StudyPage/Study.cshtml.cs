@@ -72,6 +72,8 @@ public class StudyModel : PageModel
 
         var query = _context.FlashcardsProgress
             .AsNoTracking()
+            .Include(i=>i.LinkedDeck)
+            .Include(i=>i.LinkedFlashcard)
             .Where(q => q.StudySessionId == id && q.UserId == user.Id);
 
         Data.EntityList = await PaginatedList<FlashcardProgress>.CreateAsync(

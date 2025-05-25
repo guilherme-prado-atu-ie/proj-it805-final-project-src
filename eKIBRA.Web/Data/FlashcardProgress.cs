@@ -98,9 +98,9 @@ public class FlashcardProgress
     public virtual bool IsDeleted { get; set; }
     public virtual Guid Version { get; set; }
 
-    public virtual StudySession? LinkedStudySession { get; set; }
-    public virtual Deck? LinkedDeck { get; set; }
-    public virtual Flashcard? LinkedFlashcard { get; set; }
+    public virtual StudySession LinkedStudySession { get; set; }
+    public virtual Deck LinkedDeck { get; set; }
+    public virtual Flashcard LinkedFlashcard { get; set; }
 
     public virtual ApplicationUser? User { get; set; }
     public virtual ApplicationUser? ModifierUser { get; set; }
