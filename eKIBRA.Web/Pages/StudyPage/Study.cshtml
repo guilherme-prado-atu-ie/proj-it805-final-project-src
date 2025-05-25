@@ -1,0 +1,103 @@
+﻿@page
+@model eKIBRA.Web.Pages.StudyPage.StudyModel
+
+@{
+    ViewData["Title"] = "Study";
+}
+<partial name="_ValidationAuthenticationCheckPartial" />
+
+<h4>Study Flashcard</h4>
+
+<partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
+
+@{ if (string.IsNullOrWhiteSpace(Model.Input?.Id)) return; }
+
+<p>
+    <a asp-page="./Create">Create New</a> |
+    <a asp-page="./Details" asp-route-id="@Model.Input.Id">Details</a> |
+    <a asp-page="./Delete" asp-route-id="@Model.Input.Id">Delete</a> |
+    <a asp-page="./Index">Back to List</a>
+</p>
+<hr />
+
+@{
+    var prevDisabled = !Model.Data.EntityList.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Data.EntityList.HasNextPage ? "disabled" : "";
+}
+
+<div class="row align-items-center">
+    <div class="col">
+        <form asp-page="./Study" method="get">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <input asp-for="@Model.Filter.TitleFilter" class="form-control" autocomplete="off" 
+                           placeholder="Title" name="searchTitle" value="@Model.Filter.TitleFilter" />
+                </div>
+                <div class="col-auto">
+                    <select asp-for="@Model.Filter.StatusFilter" class="form-control"
+                            asp-items="Html.GetEnumSelectList<StudySessionStatus>()"
+                            placeholder="Status" name="searchStatus" >
+                        <option value="">Select a value</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="submit" value="Filter" class="btn btn-primary" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-auto">
+        <a asp-page="./Study"
+           asp-route-id="@Model.Input.StudySessionId"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex - 1)"
+           class="btn btn-primary @prevDisabled">
+            Previous
+        </a>
+
+        <button class="btn btn-dark">@Model.Data.EntityList.PageIndex / @Model.Data.EntityList.TotalPages</button>
+
+        <a asp-page="./Study"
+           asp-route-id="@Model.Input.StudySessionId"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex + 1)"
+           class="btn btn-primary @nextDisabled">
+            Next
+        </a>
+    </div>
+</div>
+<br />
+
+!!! add content here !!!
+
+<div class="row align-items-center">
+    <div class="col"></div>
+    <div class="col-md-auto">
+        <a asp-page="./Study"
+           asp-route-id="@Model.Input.StudySessionId"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex - 1)"
+           class="btn btn-primary @prevDisabled">
+            Previous
+        </a>
+
+        <button class="btn btn-dark">@Model.Data.EntityList.PageIndex / @Model.Data.EntityList.TotalPages</button>
+
+        <a asp-page="./Study"
+           asp-route-id="@Model.Input.StudySessionId"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex + 1)"
+           class="btn btn-primary @nextDisabled">
+            Next
+        </a>
+    </div>
+</div>

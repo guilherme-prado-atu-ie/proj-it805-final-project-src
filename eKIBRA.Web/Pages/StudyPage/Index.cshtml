@@ -124,9 +124,20 @@
                     @item.Modified?.ToString("dd.MMM.yyyy HH:mm")
                 </td>
                 <td>
-                    <a asp-page="./Study" asp-route-id="@item.Id">Study</a> |
-                    <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+                    @{
+                        var studyStatus = item.Status == StudySessionStatus.Completed;
+                        var studyDisabled = studyStatus ? "disabled" : "";
+                        var studyBtn = studyStatus ? "btn-outline-secondary" : "btn-success";
+                        
+                        <a asp-page="./Study" asp-route-id="@item.Id" 
+                           class="btn @studyBtn btn-sm @studyDisabled">Study</a><span> | </span>
+                        
+                        <a asp-page="./Details" asp-route-id="@item.Id" 
+                           class="btn btn-link btn-sm">Details</a><span> | </span>
+                        
+                        <a asp-page="./Delete" asp-route-id="@item.Id" 
+                           class="btn btn-link btn-sm">Delete</a>
+                    }
                 </td>
             </tr>
         }

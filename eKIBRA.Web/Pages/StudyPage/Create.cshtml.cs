@@ -1,6 +1,7 @@
 using System.Text.Json;
 using eKIBRA.Web.Data;
 using eKIBRA.Web.Pages.Shared;
+using eKIBRA.Web.SrmAlgorithm;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -14,6 +15,7 @@ namespace eKIBRA.Web.Pages.StudyPage
     {
         private readonly ILogger<CreateModel> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly ISpacedRepetitionImplementation _srm;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
 
@@ -27,11 +29,13 @@ namespace eKIBRA.Web.Pages.StudyPage
         public CreateModel(
             ILogger<CreateModel> logger,
             ApplicationDbContext context,
+            ISpacedRepetitionImplementation srm,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
             _logger = logger;
             _context = context;
+            _srm = srm;
             _user = userManager;
             _signin = signInManager;
         }
@@ -79,6 +83,11 @@ namespace eKIBRA.Web.Pages.StudyPage
                 .OrderBy(o => o.Display)
                 .ToListAsync();
 
+            if (query is { Count: 0 })
+            {
+                query.Add(new { Title = "No results", Description = "No results", Display = "No results", Value = string.Empty }!);
+            }
+            
             var json = JsonSerializer.Serialize(query);
             return new JsonResult(json);
         }
@@ -118,20 +127,23 @@ namespace eKIBRA.Web.Pages.StudyPage
                                 + "You have a non-completed Study Session. Please complete it before creating a new one.";
                 return Page();
             }
+
+            var newId = Guid.NewGuid().ToString();
+            var srmParams = new StudySessionParam
+                { Id = newId, UserId = user.Id, DeckId = Input.DeckId };
             
             var data = new StudySession
             {
-                Id = Guid.NewGuid()
-                    .ToString(),
+                Id = newId,
                 UserId = user.Id,
                 DeckId = Input.DeckId,
                 Version = Guid.NewGuid(), // to avoid concurrency issues when updating metadata
-                FlashcardsProgress = []
+                FlashcardsProgress = await _srm.CreateListOfFlashcardProgress(srmParams)
             };
-
-            _context.StudySessions.Add(data);
+            
             try
             {
+                _context.StudySessions.Add(data);
                 await _context.SaveChangesAsync();
             }
             catch (Exception e)
