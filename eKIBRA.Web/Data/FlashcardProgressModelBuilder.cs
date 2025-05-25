@@ -11,13 +11,13 @@ internal static class FlashcardProgressModelBuilder<T> where T : FlashcardProgre
 
         builder.Entity<T>()
             .HasIndex(i => new { i.UserId, i.DeckId, i.StudySessionId, i.Sequence, i.FlashcardId });
-        
+
         builder.Entity<T>()
             .HasOne(e => e.LinkedStudySession);
-        
+
         builder.Entity<T>()
             .HasOne(e => e.LinkedDeck);
-        
+
         builder.Entity<T>()
             .HasOne(e => e.LinkedFlashcard);
 
@@ -43,7 +43,7 @@ internal static class FlashcardProgressModelBuilder<T> where T : FlashcardProgre
             .Property(p => p.ForgetAt);
         builder.Entity<T>()
             .Property(p => p.Level);
-        
+
         builder.Entity<T>()
             .Property(p => p.RevealsAcrossSessions);
         builder.Entity<T>()
@@ -54,16 +54,16 @@ internal static class FlashcardProgressModelBuilder<T> where T : FlashcardProgre
             .Property(p => p.SpacedRepetitionInterval);
         builder.Entity<T>()
             .Property(p => p.NextSpacedRepetitionInterval);
-        
+
         builder.Entity<T>()
             .Property(p => p.Created);
         builder.Entity<T>()
             .Property(p => p.Modified);
-        
+
         builder.Entity<T>()
             .Property(p => p.IsDeleted);
     }
-    
+
     private static void SetIds(ModelBuilder builder)
     {
         builder.Entity<T>()
@@ -82,11 +82,11 @@ internal static class FlashcardProgressModelBuilder<T> where T : FlashcardProgre
             .Property(p => p.DeckId)
             .IsUnicode()
             .HasMaxLength(450);
-        
+
         builder.Entity<T>()
             .Property(p => p.FlashcardId)
             .IsUnicode()
-            .HasMaxLength(450);        
+            .HasMaxLength(450);
 
         builder.Entity<T>()
             .Property(k => k.UserId)

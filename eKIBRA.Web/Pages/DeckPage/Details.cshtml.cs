@@ -52,7 +52,7 @@ namespace eKIBRA.Web.Pages.DeckPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var data = await _context.Decks
                 .AsNoTracking()
                 .Where(q => q.Id == id && q.UserId == user.Id)

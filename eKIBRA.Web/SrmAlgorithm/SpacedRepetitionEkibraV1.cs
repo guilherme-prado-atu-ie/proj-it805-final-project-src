@@ -14,7 +14,7 @@ public class StudySessionParam
     public string Id { get; set; }
     public string UserId { get; set; }
     public string DeckId { get; set; }
-} 
+}
 
 public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
 {
@@ -22,7 +22,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _user;
     private readonly SignInManager<ApplicationUser> _signin;
-    
+
     public SpacedRepetitionEKibraV1(
         ILogger<SpacedRepetitionEKibraV1> logger,
         ApplicationDbContext context,
@@ -34,7 +34,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
         _user = userManager;
         _signin = signInManager;
     }
-    
+
     public virtual async Task<List<FlashcardProgress>> CreateListOfFlashcardProgress(StudySessionParam input)
     {
         /*
@@ -43,7 +43,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
          * copy data from previous study session
          * use to set the next interval
          */
-        
+
         /*
            Id = Guid.NewGuid().           
            UserId = user.Id,
@@ -55,23 +55,23 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
             .Include(i => i.Flashcards)
             .Where(q => q.UserId == input.UserId && q.Id == input.DeckId)
             .FirstOrDefaultAsync();
-        
+
         if (tmp is null)
         {
             _logger.LogWarning("Deck not found.");
             return [];
         }
-        
-        if (tmp.Flashcards is {Count: 0})
+
+        if (tmp.Flashcards is { Count: 0 })
         {
             _logger.LogWarning("Deck has no flashcards.");
             return [];
         }
-        
+
         var listOfFlashcardProgress = new List<FlashcardProgress>();
         var sequence = 0;
         var created = DateTime.UtcNow;
-        
+
         foreach (var item in tmp.Flashcards)
         {
             listOfFlashcardProgress.Add(new FlashcardProgress
@@ -95,9 +95,9 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
                 Version = Guid.NewGuid(),
             });
         }
-        
+
         return listOfFlashcardProgress;
-    } 
+    }
 
     public virtual int GetNextInterval(FlashcardProgress flashcardProgress)
     {

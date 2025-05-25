@@ -16,7 +16,7 @@ public class StudyModel : PageModel
 
     [TempData]
     public string StatusMessage { get; set; } = string.Empty;
-    
+
     [BindProperty]
     public FlashcardProgress Input { get; set; } = null!;
     public StudyFlashcardsProgressViewModel Data { get; set; } = new();
@@ -72,18 +72,18 @@ public class StudyModel : PageModel
 
         var query = _context.FlashcardsProgress
             .AsNoTracking()
-            .Include(i=>i.LinkedDeck)
-            .Include(i=>i.LinkedFlashcard)
+            .Include(i => i.LinkedDeck)
+            .Include(i => i.LinkedFlashcard)
             .Where(q => q.StudySessionId == id && q.UserId == user.Id);
 
         Data.EntityList = await PaginatedList<FlashcardProgress>.CreateAsync(
             query, pageIndex ?? 1, _pageSize);
 
-        Input = Data.EntityList is { Count : 0 } 
-            ? null! 
+        Input = Data.EntityList is { Count: 0 }
+            ? null!
             : Data.EntityList[0];
 
-    
+
 
         // add logic to retrieve flashcards here
     }

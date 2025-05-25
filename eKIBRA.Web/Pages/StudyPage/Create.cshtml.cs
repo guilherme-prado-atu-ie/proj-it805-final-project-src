@@ -64,17 +64,17 @@ namespace eKIBRA.Web.Pages.StudyPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var inUse = _context.StudySessions
                 .AsNoTracking()
-                .Where(q => 
-                    q.UserId == user.Id 
+                .Where(q =>
+                    q.UserId == user.Id
                     && q.Status != StudySessionStatus.Completed)
-                .Select(s=> new { s.DeckId });
-            
+                .Select(s => new { s.DeckId });
+
             var query = await _context.Decks
                 .AsNoTracking()
-                .Where(q => 
+                .Where(q =>
                     q.UserId == user.Id
                     && q.Title.Contains(search)
                     && !inUse
@@ -87,7 +87,7 @@ namespace eKIBRA.Web.Pages.StudyPage
             {
                 query.Add(new { Title = "No results", Description = "No results", Display = "No results", Value = string.Empty }!);
             }
-            
+
             var json = JsonSerializer.Serialize(query);
             return new JsonResult(json);
         }
@@ -115,8 +115,8 @@ namespace eKIBRA.Web.Pages.StudyPage
             // Check for existing Non-Completed Study Sessions
             var hasNonCompleted = await _context.StudySessions
                 .AsNoTracking()
-                .Where(q=> 
-                    q.UserId == user.Id 
+                .Where(q =>
+                    q.UserId == user.Id
                     && q.DeckId == Input.DeckId
                     && q.Status != StudySessionStatus.Completed)
                 .AnyAsync();
@@ -130,8 +130,8 @@ namespace eKIBRA.Web.Pages.StudyPage
 
             var newId = Guid.NewGuid().ToString();
             var srmParams = new StudySessionParam
-                { Id = newId, UserId = user.Id, DeckId = Input.DeckId };
-            
+            { Id = newId, UserId = user.Id, DeckId = Input.DeckId };
+
             var data = new StudySession
             {
                 Id = newId,
@@ -140,7 +140,7 @@ namespace eKIBRA.Web.Pages.StudyPage
                 Version = Guid.NewGuid(), // to avoid concurrency issues when updating metadata
                 FlashcardsProgress = await _srm.CreateListOfFlashcardProgress(srmParams)
             };
-            
+
             try
             {
                 _context.StudySessions.Add(data);

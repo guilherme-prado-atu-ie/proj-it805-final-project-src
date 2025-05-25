@@ -138,7 +138,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var data = await _context.Flashcards
                 .Where(q => q.Id == Input.Id && q.UserId == user.Id)
                 .FirstOrDefaultAsync();
@@ -148,16 +148,16 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                                  + "The record no longer exists.";
                 return Page();
             }
-                        
+
             // check if the deck is in use by any study session
             var inUse = await _context.StudySessions
                 .AsNoTracking()
-                .Where(q => 
-                    q.UserId == user.Id 
+                .Where(q =>
+                    q.UserId == user.Id
                     && q.DeckId == data.DeckId
                     && q.Status != StudySessionStatus.Completed)
                 .AnyAsync();
-            
+
             if (inUse)
             {
                 StatusMessage = MessageType.Warning

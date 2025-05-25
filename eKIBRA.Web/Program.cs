@@ -23,7 +23,7 @@ public class Program
             .AddEntityFrameworkStores<ApplicationDbContext>();
 
         builder.Services.AddScoped<ISpacedRepetitionImplementation, SpacedRepetitionEKibraV1>();
-        
+
         builder.Services.AddRazorPages();
 
         var app = builder.Build();

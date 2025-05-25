@@ -55,11 +55,11 @@ namespace eKIBRA.Web.Pages.StudyPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var data = await _context.StudySessions
                 .AsNoTracking()
-                .Include(sq=> sq.LinkedDeck)
-                .Where(q=> q.Id == id && q.UserId == user.Id)
+                .Include(sq => sq.LinkedDeck)
+                .Where(q => q.Id == id && q.UserId == user.Id)
                 .FirstOrDefaultAsync();
 
             if (data is null)
