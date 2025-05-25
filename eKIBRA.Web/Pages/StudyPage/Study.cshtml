@@ -6,111 +6,59 @@
 }
 <partial name="_ValidationAuthenticationCheckPartial" />
 
-<h4>Study Flashcard</h4>
+@{ if (string.IsNullOrWhiteSpace(Model.Input?.Id)) return; }
+
+<h4>Studying Session - Deck (@Html.DisplayFor(model => model.Input.LinkedDeck.Title))</h4>
 
 <partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
 
-@{ if (string.IsNullOrWhiteSpace(Model.Input?.Id)) return; }
+@{
+    /*var prevDisabled = !Model.Data.EntityList.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Data.EntityList.HasNextPage ? "disabled" : "";
+    var progress = Model.Data.EntityList.PageIndex / Model.Data.EntityList.TotalPages;
+    var questionIndex = Model.Data.EntityList.PageIndex;
+    var questionTotal = Model.Data.EntityList.TotalPages;
+    var displayRemember = Model.Input.Remembers == 0;*/
+}
 
 <p>
-    <a asp-page="./Create">Create New</a> |
+    @*<a asp-page="./Create">Create New</a> |
     <a asp-page="./Details" asp-route-id="@Model.Input.Id">Details</a> |
     <a asp-page="./Delete" asp-route-id="@Model.Input.Id">Delete</a> |
-    <a asp-page="./Index">Back to List</a>
+    <a asp-page="./Index">Back to List</a>*@
 </p>
 <hr />
 
-@{
-    var prevDisabled = !Model.Data.EntityList.HasPreviousPage ? "disabled" : "";
-    var nextDisabled = !Model.Data.EntityList.HasNextPage ? "disabled" : "";
+
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            <input type="hidden" asp-for="Input.Id" />
+            <div class="container">
+                <div class="card-deck mb-3 text-center">
+                    <div class="card mb-4 box-shadow">
+                        <div class="card-header">
+                            <h4 class="my-0 font-weight-normal">Question 1 of 10</h4>
+                        </div>
+                        <div class="card-body">
+                            <p>@Model.Input.LinkedFlashcard.Question</p>
+                            <hr/>
+                            <p>@Model.Input.LinkedFlashcard.Answer</p>
+                        </div>
+                        <div class="card-footer">
+                            @*<button id="save-book-button" type="submit" class="btn btn-primary"></button>*@
+                            <button type="button" class="btn btn-lg btn-block btn-outline-primary">Reveal</button>
+                            <button type="button" class="btn btn-lg btn-block btn-outline-success">Remember</button>
+                            <button type="button" class="btn btn-lg btn-block btn-outline-danger">Forgot</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
-
-<div class="row align-items-center">
-    <div class="col-md-auto">
-        <a asp-page="./Study"
-           asp-route-id="@Model.Input.StudySessionId"
-           asp-route-sortedBy="@Model.Filter.SortedBy"
-           asp-route-titleFilter="@Model.Filter.TitleFilter"
-           asp-route-statusFilter="@Model.Filter.StatusFilter"
-           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex - 1)"
-           class="btn btn-primary @prevDisabled">
-            Previous
-        </a>
-
-        <button class="btn btn-dark">@Model.Data.EntityList.PageIndex / @Model.Data.EntityList.TotalPages</button>
-
-        <a asp-page="./Study"
-           asp-route-id="@Model.Input.StudySessionId"
-           asp-route-sortedBy="@Model.Filter.SortedBy"
-           asp-route-titleFilter="@Model.Filter.TitleFilter"
-           asp-route-statusFilter="@Model.Filter.StatusFilter"
-           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex + 1)"
-           class="btn btn-primary @nextDisabled">
-            Next
-        </a>
-    </div>
-</div>
-<br />
-
-<div class="table-responsive">
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>
-                <h5>
-                    @Html.DisplayNameFor(model => model.Input.LinkedDeck.Title)    
-                </h5>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                <h1>@Model.Input.LinkedFlashcard.Question</h1>
-            </th>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider">
-    <tr>
-        <td>
-            <h1>@Model.Input.LinkedFlashcard.Answer</h1>
-        </td>
-    </tr>
-    <tr>
-        <td>
-        </tr>
-    <td>
-    </tbody>
-</table>
-</div>
-
-
-
-
-
-
-<br />
-<div class="row align-items-center">
-    <div class="col"></div>
-    <div class="col-md-auto">
-        <a asp-page="./Study"
-           asp-route-id="@Model.Input.StudySessionId"
-           asp-route-sortedBy="@Model.Filter.SortedBy"
-           asp-route-titleFilter="@Model.Filter.TitleFilter"
-           asp-route-statusFilter="@Model.Filter.StatusFilter"
-           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex - 1)"
-           class="btn btn-primary @prevDisabled">
-            Previous
-        </a>
-
-        <button class="btn btn-dark">@Model.Data.EntityList.PageIndex / @Model.Data.EntityList.TotalPages</button>
-
-        <a asp-page="./Study"
-           asp-route-id="@Model.Input.StudySessionId"
-           asp-route-sortedBy="@Model.Filter.SortedBy"
-           asp-route-titleFilter="@Model.Filter.TitleFilter"
-           asp-route-statusFilter="@Model.Filter.StatusFilter"
-           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex + 1)"
-           class="btn btn-primary @nextDisabled">
-            Next
-        </a>
-    </div>
-</div>

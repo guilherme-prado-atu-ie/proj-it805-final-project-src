@@ -105,11 +105,31 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                                  + "The record no longer exists.";
                 return Page();
             }
+            
+            // check if the deck is in use by any study session
+            var inUse = await _context.StudySessions
+                .AsNoTracking()
+                .Include(i=> i.FlashcardsProgress)
+                .Where(q =>
+                    q.UserId == user.Id
+                    && q.DeckId == data.DeckId
+                    && q.Status != StudySessionStatus.Completed
+                    && q.FlashcardsProgress.Any(p => p.FlashcardId == data.Id))
+                .AnyAsync();
+
+            if (inUse)
+            {
+                StatusMessage = MessageType.Warning
+                                + "Cannot change a Flashcard's Deck while any Study Session is not Completed.";
+                return Page();
+            }
 
             // replacing the title with a Guid to avoid duplicate key error for soft-deleted items
             data.Modified = DateTime.UtcNow;
             data.ModifierUserId = user.Id;
             data.Question = "Deleted " + data.Id;
+            data.Answer = "Deleted " + data.Id;
+            data.Incorrects = [];
             data.IsDeleted = true;
 
             await _context.SaveChangesAsync();

@@ -46,7 +46,7 @@ internal static class StudySessionModelBuilder<T> where T : StudySession
             .HasIndex(i => new { i.UserId, i.DeckId, i.Status });
 
         builder.Entity<T>()
-            .HasQueryFilter(f => !f.IsDeleted);
+            .HasQueryFilter(p => !p.IsDeleted);
 
         builder.Entity<T>()
             .HasOne(e => e.LinkedDeck);

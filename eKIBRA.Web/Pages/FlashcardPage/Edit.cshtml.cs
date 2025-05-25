@@ -152,10 +152,12 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             // check if the deck is in use by any study session
             var inUse = await _context.StudySessions
                 .AsNoTracking()
+                .Include(i=> i.FlashcardsProgress)
                 .Where(q =>
                     q.UserId == user.Id
                     && q.DeckId == data.DeckId
-                    && q.Status != StudySessionStatus.Completed)
+                    && q.Status != StudySessionStatus.Completed
+                    && q.FlashcardsProgress.Any(p => p.FlashcardId == data.Id))
                 .AnyAsync();
 
             if (inUse)
