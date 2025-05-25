@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Globalization;
-using System.Text.Json;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace eKIBRA.Web.Data;
 
-internal static class FlashcardModelBuilder<T> where T : Flashcard
+internal static class StudySessionModelBuilder<T> where T : StudySession
 {
     internal static void SetModel(ModelBuilder builder)
     {
@@ -16,9 +13,6 @@ internal static class FlashcardModelBuilder<T> where T : Flashcard
             .Property(p => p.Id)
             .IsUnicode()
             .HasMaxLength(450);
-
-        builder.Entity<T>()
-            .Property(p => p.IsDeleted);
 
         builder.Entity<T>()
             .Property(p => p.DeckId)
@@ -36,16 +30,11 @@ internal static class FlashcardModelBuilder<T> where T : Flashcard
             .HasMaxLength(450);
 
         builder.Entity<T>()
-            .Property(p => p.Question)
-            .HasMaxLength(4000);
-        builder.Entity<T>()
-            .Property(p => p.Answer)
-            .HasMaxLength(4000);
-        builder.Entity<T>()
-            .Property(p => p.Incorrects)
-            .HasConversion(
-                input => JsonSerializer.Serialize(input, JsonSerializerOptions.Default),
-                output => JsonSerializer.Deserialize<List<string>>(output, JsonSerializerOptions.Default) ?? new(), ValueComparer.CreateDefault<List<string>>(true));
+            .Property(p => p.Version)
+            .IsUnicode()
+            .HasMaxLength(450)
+            .IsConcurrencyToken();
+
         builder.Entity<T>()
             .Property(p => p.Created);
         builder.Entity<T>()
@@ -54,12 +43,22 @@ internal static class FlashcardModelBuilder<T> where T : Flashcard
             .Property(p => p.IsDeleted);
 
         builder.Entity<T>()
-            .HasIndex(i => new { i.UserId, i.DeckId, i.Question })
-            .IsUnique()
-            .HasFilter("[Question] IS NOT NULL");
+            .HasIndex(i => new { i.UserId, i.DeckId, i.Status });
 
         builder.Entity<T>()
-            .HasOne(e => e.LinkedDeck);
+            .HasQueryFilter(f=> 
+                !f.IsDeleted 
+                && f.LinkedDeck != null 
+                && !f.LinkedDeck.IsDeleted)
+            .HasOne(e => e.LinkedDeck)
+            .WithOne()
+            .IsRequired();
+
+        builder.Entity<T>()
+            .HasMany(e => e.FlashcardsProgress)
+            .WithOne(e => e.LinkedStudySession as T) // maybe won't work or will fail migration
+            .HasForeignKey(f => f.StudySessionId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.Entity<T>()
             .HasOne(e => e.User)
@@ -75,6 +74,7 @@ internal static class FlashcardModelBuilder<T> where T : Flashcard
 
         builder.Entity<T>()
             .HasQueryFilter(p => !p.IsDeleted);
-    }
 
+
+    }
 }

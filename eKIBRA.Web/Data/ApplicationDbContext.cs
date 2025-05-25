@@ -13,13 +13,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        
-        ApplicationUserModelBuilder.SetModel(builder);
-        DeckModelBuilder.SetModel(builder);
-        FlashcardModelBuilder.SetModel(builder);
+
+        ApplicationUserModelBuilder<ApplicationUser>.SetModel(builder);
+        DeckModelBuilder<Deck>.SetModel(builder);
+        FlashcardModelBuilder<Flashcard>.SetModel(builder);
+        StudySessionModelBuilder<StudySession>.SetModel(builder);
+        FlashcardProgressModelBuilder<FlashcardProgress>.SetModel(builder);
     }
-    
+
     public override DbSet<ApplicationUser> Users { get; set; }
     public DbSet<Deck> Decks { get; set; }
     public DbSet<Flashcard> Flashcards { get; set; }
+    public DbSet<StudySession> StudySessions { get; set; }
+    public DbSet<FlashcardProgress> FlashcardsProgress { get; set; }
+
 }

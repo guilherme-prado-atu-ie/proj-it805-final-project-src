@@ -91,6 +91,7 @@ public class FlashcardProgress
 
     public virtual DateTime Created { get; set; } = DateTime.UtcNow;
     public virtual DateTime? Modified { get; set; }
+    public virtual string? ModifierUserId { get; set; }
 
     public virtual bool IsDeleted { get; set; }
     public virtual Guid Version { get; set; }
@@ -98,6 +99,9 @@ public class FlashcardProgress
     public virtual StudySession? LinkedStudySession { get; set; }
     public virtual Deck? LinkedDeck { get; set; }
     public virtual Flashcard? LinkedFlashcard { get; set; }
+
+    public virtual ApplicationUser? User { get; set; }
+    public virtual ApplicationUser? ModifierUser { get; set; }
 }
 
 public enum DifficultyLevel
