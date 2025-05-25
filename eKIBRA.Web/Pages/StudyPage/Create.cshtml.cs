@@ -106,10 +106,11 @@ namespace eKIBRA.Web.Pages.StudyPage
             // Check for existing Non-Completed Study Sessions
             var hasNonCompleted = await _context.StudySessions
                 .AsNoTracking()
-                .AnyAsync(q=> 
+                .Where(q=> 
                     q.UserId == user.Id 
                     && q.DeckId == Input.DeckId
-                    && q.Status != StudySessionStatus.Completed);
+                    && q.Status != StudySessionStatus.Completed)
+                .AnyAsync();
 
             if (hasNonCompleted)
             {
@@ -159,7 +160,7 @@ namespace eKIBRA.Web.Pages.StudyPage
                  * 2627 - Unique constraint error
                  */
                 StatusMessage = MessageType.Warning
-                                + $"Cannot create a new Study Session with selected Deck '{Input.Description}'." +
+                                + $"Cannot create a new Study Session with selected Deck '{Input.DeckTitle}'." +
                                 "The Deck is already in use by another Study Session.";
             else
                 StatusMessage = MessageType.Error
