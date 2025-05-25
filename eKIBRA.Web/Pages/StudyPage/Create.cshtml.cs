@@ -1,3 +1,4 @@
+using System.Text.Json;
 using eKIBRA.Web.Data;
 using eKIBRA.Web.Pages.Shared;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +22,7 @@ namespace eKIBRA.Web.Pages.StudyPage
         public string StatusMessage { get; set; } = string.Empty;
 
         [BindProperty]
-        public CreateViewModel Input { get; set; } = new();
+        public CreateViewModel Input { get; set; } = null!;
 
         public CreateModel(
             ILogger<CreateModel> logger,
@@ -35,9 +36,19 @@ namespace eKIBRA.Web.Pages.StudyPage
             _signin = signInManager;
         }
 
-        public async Task<IActionResult> OnGetAsync()
+        public IActionResult OnGet()
         {
+            if (!_signin.IsSignedIn(User))
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+            }
             StatusMessage = string.Empty;
+            return Page();
+        }
+
+        public async Task<IActionResult> OnGetSearchDeckAsync(string search)
+        {
+            // User authenticated - validation
             if (!_signin.IsSignedIn(User))
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -49,28 +60,27 @@ namespace eKIBRA.Web.Pages.StudyPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            // Retrieve available decks
-            RetrieveAvailableDecks(user);
-            return Page();
-        }
-
-        private void RetrieveAvailableDecks(ApplicationUser user)
-        {
-            var studySessions = _context.StudySessions
+            
+            var inUse = _context.StudySessions
                 .AsNoTracking()
                 .Where(q => 
                     q.UserId == user.Id 
                     && q.Status != StudySessionStatus.Completed)
                 .Select(s=> new { s.DeckId });
             
-            var decks = _context.Decks
+            var query = await _context.Decks
                 .AsNoTracking()
                 .Where(q => 
                     q.UserId == user.Id
-                    && !studySessions
-                        .Any(s => s.DeckId == q.Id));
-            
-            ViewData["Decks"] = new SelectList(decks, "Id", "Title");
+                    && q.Title.Contains(search)
+                    && !inUse
+                        .Any(s => s.DeckId == q.Id))
+                .Select(s => new { Title = s.Title, Description = s.Description, Display = s.Title, Value = s.Id })
+                .OrderBy(o => o.Display)
+                .ToListAsync();
+
+            var json = JsonSerializer.Serialize(query);
+            return new JsonResult(json);
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -114,6 +124,7 @@ namespace eKIBRA.Web.Pages.StudyPage
                     .ToString(),
                 UserId = user.Id,
                 DeckId = Input.DeckId,
+                Version = Guid.NewGuid(), // to avoid concurrency issues when updating metadata
                 FlashcardsProgress = []
             };
 
@@ -130,7 +141,7 @@ namespace eKIBRA.Web.Pages.StudyPage
              * change the behavior to stay on the page
              * and notify the user the record was created
              */
-            StatusMessage = MessageType.Success + "Deck created.";
+            StatusMessage = MessageType.Success + "Study Session created.";
             return Page();
         }
 
@@ -148,12 +159,13 @@ namespace eKIBRA.Web.Pages.StudyPage
                  * 2627 - Unique constraint error
                  */
                 StatusMessage = MessageType.Warning
-                                + $"Cannot create a new Deck. Title '{Input.Description}' is duplicated.";
+                                + $"Cannot create a new Study Session with selected Deck '{Input.Description}'." +
+                                "The Deck is already in use by another Study Session.";
             else
                 StatusMessage = MessageType.Error
-                                + "Fail to create a new Deck.";
+                                + "Fail to create a new Study Session.";
 
-            _logger.LogError(e, "An error occurred while creating a new Deck.");
+            _logger.LogError(e, "An error occurred while creating a new Study Session.");
             return Page();
         }
     }

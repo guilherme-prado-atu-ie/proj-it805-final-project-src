@@ -1,4 +1,6 @@
-﻿namespace eKIBRA.Web.Data;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace eKIBRA.Web.Data;
 
 public class StudySession
 {
@@ -22,7 +24,10 @@ public class StudySession
 /// </summary>
 public enum StudySessionStatus
 {
+    [Display(Name = "Created", Description = "Created")]
     Created,
+    [Display(Name = "In Progress", Description = "In Progress")]
     InProgress,
+    [Display(Name = "Completed", Description = "Completed")]
     Completed,
 }

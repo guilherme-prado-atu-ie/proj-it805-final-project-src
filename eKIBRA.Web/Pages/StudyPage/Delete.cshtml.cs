@@ -112,10 +112,14 @@ namespace eKIBRA.Web.Pages.StudyPage
             foreach (var item in data.FlashcardsProgress)
             {
                 // updating IsDeleted to soft-deleted items
+                item.Modified = DateTime.UtcNow;
+                item.ModifierUserId = user.Id;
                 item.IsDeleted = true;
             }
 
             // updating Status and IsDeleted soft-deleted items
+            data.Modified = DateTime.UtcNow;
+            data.ModifierUserId = user.Id;
             data.Status = StudySessionStatus.Completed;
             data.IsDeleted = true;
 

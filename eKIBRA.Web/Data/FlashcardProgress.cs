@@ -1,4 +1,6 @@
-﻿namespace eKIBRA.Web.Data;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace eKIBRA.Web.Data;
 
 public class FlashcardProgress
 {
@@ -106,7 +108,10 @@ public class FlashcardProgress
 
 public enum DifficultyLevel
 {
+    [Display(Name = "Easy", Description = "Easy")]
     Easy,
+    [Display(Name = "Medium", Description = "Medium")]
     Medium,
+    [Display(Name = "Hard", Description = "Hard")]
     Hard,
 }

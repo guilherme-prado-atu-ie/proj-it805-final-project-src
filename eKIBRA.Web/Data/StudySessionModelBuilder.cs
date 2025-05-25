@@ -48,7 +48,6 @@ internal static class StudySessionModelBuilder<T> where T : StudySession
         builder.Entity<T>()
             .HasQueryFilter(f=> 
                 !f.IsDeleted 
-                && f.LinkedDeck != null 
                 && !f.LinkedDeck.IsDeleted)
             .HasOne(e => e.LinkedDeck)
             .WithOne()

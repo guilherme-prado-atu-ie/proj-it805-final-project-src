@@ -107,6 +107,8 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             }
 
             // replacing the title with a Guid to avoid duplicate key error for soft-deleted items
+            data.Modified = DateTime.UtcNow;
+            data.ModifierUserId = user.Id;
             data.Question = "Deleted " + data.Id;
             data.IsDeleted = true;
 

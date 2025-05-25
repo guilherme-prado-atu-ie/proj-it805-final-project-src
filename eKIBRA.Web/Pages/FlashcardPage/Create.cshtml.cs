@@ -64,7 +64,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 .Where(q =>
                     q.UserId == user.Id
                     && q.Title.Contains(search))
-                .Select(s => new { Title = s.Title, Display = s.Title, Value = s.Id })
+                .Select(s => new { Title = s.Title, Description = s.Description, Display = s.Title, Value = s.Id })
                 .OrderBy(o => o.Title)
                 .ToListAsync();
 
