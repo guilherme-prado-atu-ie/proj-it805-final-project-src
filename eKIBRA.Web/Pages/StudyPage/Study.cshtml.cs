@@ -20,7 +20,7 @@ public class StudyModel : PageModel
     private const string NoResult = "No result";
     [TempData] public string StatusMessage { get; set; } = Empty;
 
-    [BindProperty] 
+    [BindProperty]
     public StudyViewModel Input { get; set; } = new()
     {
         UserId = Empty,
@@ -61,17 +61,17 @@ public class StudyModel : PageModel
     {
         StatusMessage = Empty;
         if (id is null) return;
-        
+
         var user = await ValidateUserAuthentication();
-        if(user is null) return;
-        
+        if (user is null) return;
+
         await StudyCommandHandlerGateway(await GetFlashcardProgress(user.Id, id));
     }
-    
+
     public async Task<IActionResult> OnPostAsync()
     {
         StatusMessage = Empty;
-        
+
         if (!ModelState.IsValid)
         {
             StatusMessage = MessageType.Error
@@ -79,8 +79,8 @@ public class StudyModel : PageModel
                             " Try open it from the Study Session list.";
             return Page();
         }
-        
-        var data = 
+
+        var data =
             await GetFlashcardProgress(Input.UserId, Input.StudySessionId, Input.FlashcardProgressId);
 
         if (data.Item is null)
@@ -88,25 +88,25 @@ public class StudyModel : PageModel
             StatusMessage = MessageType.Info
                             + "Invalid Study Flashcard." +
                             " Try open it from the Study Session list.";
-            
-            Input.DeckTitle = NoResult;
-            Input.ShowRevealButton = true;
-            Input.NoQuestionLeft = true;
-            return Page();
-        } 
-            
-        if (data.QuestionsProgress > data.TotalOfQuestions)
-        {
-            StatusMessage = MessageType.Info
-                            + "No Flashcards available for this Study Session." +
-                            " Please create a new Study session.";
-            
+
             Input.DeckTitle = NoResult;
             Input.ShowRevealButton = true;
             Input.NoQuestionLeft = true;
             return Page();
         }
-        
+
+        if (data.QuestionsProgress > data.TotalOfQuestions)
+        {
+            StatusMessage = MessageType.Info
+                            + "No Flashcards available for this Study Session." +
+                            " Please create a new Study session.";
+
+            Input.DeckTitle = NoResult;
+            Input.ShowRevealButton = true;
+            Input.NoQuestionLeft = true;
+            return Page();
+        }
+
         await StudyCommandHandlerGateway(data);
 
         switch (Input.Command)
@@ -130,7 +130,7 @@ public class StudyModel : PageModel
             Input = null!;
             return null;
         }
-        
+
         // User retrieve - validation
         var user = await _user.GetUserAsync(User);
         if (user is not null) return user;
@@ -138,7 +138,7 @@ public class StudyModel : PageModel
         Input = null!;
         return null;
     }
-    
+
     private async Task StudyCommandHandlerGateway(Navigation data)
     {
         switch (Input.Command)
@@ -160,7 +160,7 @@ public class StudyModel : PageModel
                 break;
         }
     }
-    
+
     private void GetStudyCommandHandler(Navigation data)
     {
         var (userId, studySessionId, questionProgress, totalOfQuestions, item) = data;
@@ -170,7 +170,7 @@ public class StudyModel : PageModel
             {
                 UserId = userId,
                 StudySessionId = studySessionId,
-                
+
                 DeckId = Empty,
                 FlashcardProgressId = Empty,
                 FlashcardId = Empty,
@@ -182,13 +182,13 @@ public class StudyModel : PageModel
                 Question = NoResult,
 
                 NoQuestionLeft = true,
-                
+
                 ShowRevealButton = true,
                 ShowAnwserText = false,
-                
+
                 Status = StudyViewModelStatus.Open,
                 Command = StudyViewModelCommand.Get,
-                
+
                 VersionReveal = Guid.Empty,
                 VersionFeedback = Guid.Empty,
             };
@@ -206,19 +206,19 @@ public class StudyModel : PageModel
             DeckTitle = item.LinkedDeck.Title,
             QuestionsProgress = questionProgress,
             TotalOfQuestions = totalOfQuestions,
-            
+
             NoQuestionLeft = questionProgress == 0 && totalOfQuestions == 0,
-            
+
             Question = item.LinkedFlashcard.Question,
             Answer = item.LinkedFlashcard.Answer,
 
             ShowRevealButton = showReveal,
             ShowAnwserText = !showReveal,
-            
-            Status = questionProgress > totalOfQuestions 
-                ? StudyViewModelStatus.Completed 
+
+            Status = questionProgress > totalOfQuestions
+                ? StudyViewModelStatus.Completed
                 : StudyViewModelStatus.InProgress,
-            
+
             Command = StudyViewModelCommand.Get,
 
             VersionFeedback = item.Version,
@@ -228,50 +228,50 @@ public class StudyModel : PageModel
 
     private async Task RevealCommandHandler(Navigation data)
     {
-        var (userId, studySessionId, 
+        var (userId, studySessionId,
             questionProgress, totalOfQuestions, item) = data;
 
         if (item is null || questionProgress > totalOfQuestions) { return; }
 
         Input.UserId = userId;
         Input.StudySessionId = studySessionId;
-        
+
         var version = Guid.NewGuid();
         var revealAt = DateTime.UtcNow;
         var reveals = item.Reveals + 1;
         var revealsAcrossSessions = item.RevealsAcrossSessions + 1;
         var modifiedUserId = userId;
         var modified = revealAt;
-        
+
         try
         {
             var affected = await _context.FlashcardsProgress
-                .Where(q=>
+                .Where(q =>
                     q.UserId == userId
                     && q.Id == Input.FlashcardProgressId
                     && q.Version == Input.VersionReveal)
                 .ExecuteUpdateAsync(set => set
-                    .SetProperty(v=> v.Reveals, reveals)
-                    .SetProperty(v=> v.RevealAt, revealAt)
-                    .SetProperty(v=> v.RevealsAcrossSessions, revealsAcrossSessions)
-                    .SetProperty(v=> v.Modified, modified)
-                    .SetProperty(v=> v.ModifierUserId, modifiedUserId)
-                    .SetProperty(v=> v.Version, version));
-            
+                    .SetProperty(v => v.Reveals, reveals)
+                    .SetProperty(v => v.RevealAt, revealAt)
+                    .SetProperty(v => v.RevealsAcrossSessions, revealsAcrossSessions)
+                    .SetProperty(v => v.Modified, modified)
+                    .SetProperty(v => v.ModifierUserId, modifiedUserId)
+                    .SetProperty(v => v.Version, version));
+
             if (affected == 0)
             {
                 StatusMessage = MessageType.Info
                                 + "The answer was revealed." +
                                 " Click on 'Remember' or 'Forget' for next the Flashcard.";
-                
+
             }
-            
+
             /*
              * Intentionally not updating 'Input.VersionReveal' with the new version.
              * Needed to avoid updating records when accidentally or intentionally post-backing
              * the page through refresh - e.g., pressing F5 or reloading.  
              */
-            
+
             Input = new StudyViewModel
             {
                 // VersionReveal = version,
@@ -309,11 +309,11 @@ public class StudyModel : PageModel
 
     private async Task RememberCommandHandler(Navigation data)
     {
-        var (userId, studySessionId, 
+        var (userId, studySessionId,
             questionProgress, totalOfQuestions, item) = data;
 
         if (item is null || questionProgress > totalOfQuestions) { return; }
-        
+
         var version = Guid.NewGuid();
         var remembersAt = DateTime.UtcNow;
         var remembers = item.Remembers + 1;
@@ -328,29 +328,29 @@ public class StudyModel : PageModel
         try
         {
             var affected = await _context.FlashcardsProgress
-                .Where(q=>
+                .Where(q =>
                     q.UserId == userId
                     && q.Id == Input.FlashcardProgressId
                     && q.Version == Input.VersionFeedback)
                 .ExecuteUpdateAsync(set => set
-                    .SetProperty(p=> p.Remembers, remembers)
-                    .SetProperty(p=> p.RememberAt, remembersAt)
-                    .SetProperty(p=> p.RemembersAcrossSessions, remembersAcrossSessions)
-                    .SetProperty(p=> p.Modified, modified)
-                    .SetProperty(p=> p.ModifierUserId, modifiedUserId)
-                    .SetProperty(p=> p.Version, version));
-   
+                    .SetProperty(p => p.Remembers, remembers)
+                    .SetProperty(p => p.RememberAt, remembersAt)
+                    .SetProperty(p => p.RemembersAcrossSessions, remembersAcrossSessions)
+                    .SetProperty(p => p.Modified, modified)
+                    .SetProperty(p => p.ModifierUserId, modifiedUserId)
+                    .SetProperty(p => p.Version, version));
+
             await _context.StudySessions
-                .Where(q => 
+                .Where(q =>
                     q.UserId == userId
                     && q.Id == studySessionId
                     && q.Status != studyStatus)
                 .ExecuteUpdateAsync(set => set
-                    .SetProperty(p=> p.Modified, modified)
-                    .SetProperty(p=> p.ModifierUserId, modifiedUserId)
-                    .SetProperty(p=> p.Status, studyStatus)
-                    .SetProperty(p=> p.Version, Guid.NewGuid()));   
-            
+                    .SetProperty(p => p.Modified, modified)
+                    .SetProperty(p => p.ModifierUserId, modifiedUserId)
+                    .SetProperty(p => p.Status, studyStatus)
+                    .SetProperty(p => p.Version, Guid.NewGuid()));
+
             if (affected == 0)
             {
                 StatusMessage = MessageType.Info
@@ -389,7 +389,7 @@ public class StudyModel : PageModel
                 };
                 return;
             }
-            
+
             // move next
             StatusMessage = Empty;
             Input.Command = StudyViewModelCommand.Get;
@@ -403,11 +403,11 @@ public class StudyModel : PageModel
 
     private async Task ForgotCommandHandler(Navigation data)
     {
-        var (userId, studySessionId, 
+        var (userId, studySessionId,
             questionProgress, totalOfQuestions, item) = data;
 
         if (item is null || questionProgress > totalOfQuestions) { return; }
-        
+
         Input.UserId = userId;
         Input.StudySessionId = studySessionId;
 
@@ -421,50 +421,50 @@ public class StudyModel : PageModel
         var studyStatus = isStudyCompleted
             ? StudySessionStatus.Completed
             : StudySessionStatus.InProgress;
-        
+
         // Moves to random position for next iteration
-        var sequence = Random.Shared.Next(1, totalOfQuestions); 
+        var sequence = Random.Shared.Next(1, totalOfQuestions);
 
         try
         {
             var affected = await _context.FlashcardsProgress
-                .Where(q=>
+                .Where(q =>
                     q.UserId == userId
                     && q.Id == Input.FlashcardProgressId
                     && q.Version == Input.VersionFeedback)
                 .ExecuteUpdateAsync(set => set
-                    .SetProperty(p=> p.Sequence, sequence)
-                    .SetProperty(p=> p.Forgets, forgets)
-                    .SetProperty(p=> p.ForgetAt, forgetAt)
-                    .SetProperty(p=> p.ForgetsAcrossSessions, forgetsAcrossSessions)
-                    .SetProperty(p=> p.Modified, modified)
-                    .SetProperty(p=> p.ModifierUserId, modifiedUserId)
-                    .SetProperty(p=> p.Version, version));
-            
+                    .SetProperty(p => p.Sequence, sequence)
+                    .SetProperty(p => p.Forgets, forgets)
+                    .SetProperty(p => p.ForgetAt, forgetAt)
+                    .SetProperty(p => p.ForgetsAcrossSessions, forgetsAcrossSessions)
+                    .SetProperty(p => p.Modified, modified)
+                    .SetProperty(p => p.ModifierUserId, modifiedUserId)
+                    .SetProperty(p => p.Version, version));
+
             await _context.StudySessions
-                .Where(q => 
+                .Where(q =>
                     q.UserId == userId
                     && q.Id == studySessionId
                     && q.Status != studyStatus)
                 .ExecuteUpdateAsync(set => set
-                    .SetProperty(p=> p.Modified, modified)
-                    .SetProperty(p=> p.ModifierUserId, modifiedUserId)
-                    .SetProperty(p=> p.Status, studyStatus)
-                    .SetProperty(p=> p.Version, Guid.NewGuid()));           
-            
-            
+                    .SetProperty(p => p.Modified, modified)
+                    .SetProperty(p => p.ModifierUserId, modifiedUserId)
+                    .SetProperty(p => p.Status, studyStatus)
+                    .SetProperty(p => p.Version, Guid.NewGuid()));
+
+
             if (affected == 0)
             {
                 StatusMessage = MessageType.Info
                                 + "The flashcard is already mark as `Forgot`." +
                                 " Please wait until the next Flashcard automatically appears.";
-            
+
                 /*
                  * Intentionally not updating 'Input.VersionReveal' and 'Input.VersionFeedback' with the new version.
                  * Needed to avoid updating records when accidentally or intentionally post-backing
                  * the page through refresh - e.g., pressing F5 or reloading.
                  */
-                
+
                 Input = new StudyViewModel
                 {
                     // VersionReveal = version,
@@ -493,7 +493,7 @@ public class StudyModel : PageModel
                     StudySessionId = studySessionId,
                     Command = StudyViewModelCommand.Forgot,
                 };
-                
+
                 return;
             }
 
@@ -507,7 +507,7 @@ public class StudyModel : PageModel
             HandleCreateException(e);
         }
     }
-    
+
     private async Task<Navigation> GetFlashcardProgress(string userId, string studySessionId, string? flashcardProgressId = null)
     {
         //_srm.CreateListOfFlashcardProgress();
@@ -519,7 +519,7 @@ public class StudyModel : PageModel
             .CountAsync();
 
         var questionsProgress = await _context.FlashcardsProgress
-            .AsNoTracking()    
+            .AsNoTracking()
             .Where(q =>
                 q.UserId == userId
                 && q.StudySessionId == studySessionId
@@ -530,13 +530,13 @@ public class StudyModel : PageModel
             .AsNoTracking()
             .Include(i => i.LinkedDeck)
             .Include(i => i.LinkedFlashcard)
-            .Where(q => 
+            .Where(q =>
                 q.UserId == userId
                 && q.StudySessionId == studySessionId);
-            
-        if(!IsNullOrWhiteSpace(flashcardProgressId))
+
+        if (!IsNullOrWhiteSpace(flashcardProgressId))
         {
-            query = query.Where(q => 
+            query = query.Where(q =>
                 q.Id == flashcardProgressId);
         }
         else
@@ -546,20 +546,20 @@ public class StudyModel : PageModel
                 .OrderBy(q => q.Sequence);
             //.ThenByDescending(q => q.Reveals);
         }
-        
+
         var flashcardProgress = await query.FirstOrDefaultAsync();
-        
+
         // if zero progress set to the "first question"
         return new Navigation(
-            userId, 
-            studySessionId, 
-            questionsProgress > 0 
-                ? questionsProgress 
-                : 1, 
-            totalOfQuestions, 
+            userId,
+            studySessionId,
+            questionsProgress > 0
+                ? questionsProgress
+                : 1,
+            totalOfQuestions,
             flashcardProgress);
     }
-    
+
     public IActionResult HandleCreateException(Exception e)
     {
         if (e is DbUpdateException

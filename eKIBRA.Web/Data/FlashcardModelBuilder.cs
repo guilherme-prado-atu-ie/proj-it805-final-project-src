@@ -45,8 +45,8 @@ internal static class FlashcardModelBuilder<T> where T : Flashcard
             .Property(p => p.Incorrects)
             .HasConversion(
                 input => JsonSerializer.Serialize(input, JsonSerializerOptions.Default),
-                output => JsonSerializer.Deserialize<List<string>>(output, JsonSerializerOptions.Default) 
-                          ?? new(), 
+                output => JsonSerializer.Deserialize<List<string>>(output, JsonSerializerOptions.Default)
+                          ?? new(),
                 ValueComparer.CreateDefault<List<string>>(true));
         builder.Entity<T>()
             .Property(p => p.Created);

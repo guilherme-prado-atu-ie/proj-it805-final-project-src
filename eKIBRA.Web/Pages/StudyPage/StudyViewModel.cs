@@ -4,13 +4,13 @@ namespace eKIBRA.Web.Pages.StudyPage;
 
 public class StudyViewModel
 {
-    public required string UserId { get; set; }= string.Empty;
-    public required string StudySessionId { get; set; }= string.Empty;
-    public required string DeckId { get; set; }= string.Empty;
-    public required string FlashcardProgressId { get; set; }= string.Empty;
-    public required string FlashcardId { get; set; }= string.Empty;
-    public  string DeckTitle { get; set; }= string.Empty;
-    public string Question { get; set; }= string.Empty;
+    public required string UserId { get; set; } = string.Empty;
+    public required string StudySessionId { get; set; } = string.Empty;
+    public required string DeckId { get; set; } = string.Empty;
+    public required string FlashcardProgressId { get; set; } = string.Empty;
+    public required string FlashcardId { get; set; } = string.Empty;
+    public string DeckTitle { get; set; } = string.Empty;
+    public string Question { get; set; } = string.Empty;
     public string Answer { get; set; } = string.Empty;
     public bool NoQuestionLeft { get; set; }
     public bool ShowRevealButton { get; set; }

@@ -105,11 +105,11 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                                  + "The record no longer exists.";
                 return Page();
             }
-            
+
             // check if the deck is in use by any study session
             var inUse = await _context.StudySessions
                 .AsNoTracking()
-                .Include(i=> i.FlashcardsProgress)
+                .Include(i => i.FlashcardsProgress)
                 .Where(q =>
                     q.UserId == user.Id
                     && q.DeckId == data.DeckId
