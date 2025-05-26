@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eKIBRA.Web.Data;
 
@@ -11,9 +12,11 @@ using eKIBRA.Web.Data;
 namespace eKIBRA.Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250524230958_StudyEntity")]
+    partial class StudyEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -279,8 +282,8 @@ namespace eKIBRA.Web.Data.Migrations
 
                     b.Property<string>("Answer")
                         .IsRequired()
-                        .HasMaxLength(700)
-                        .HasColumnType("nvarchar(700)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -308,8 +311,8 @@ namespace eKIBRA.Web.Data.Migrations
 
                     b.Property<string>("Question")
                         .IsRequired()
-                        .HasMaxLength(700)
-                        .HasColumnType("nvarchar(700)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -479,7 +482,8 @@ namespace eKIBRA.Web.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DeckId");
+                    b.HasIndex("DeckId")
+                        .IsUnique();
 
                     b.HasIndex("ModifierUserId");
 
@@ -627,8 +631,8 @@ namespace eKIBRA.Web.Data.Migrations
             modelBuilder.Entity("eKIBRA.Web.Data.StudySession", b =>
                 {
                     b.HasOne("eKIBRA.Web.Data.Deck", "LinkedDeck")
-                        .WithMany()
-                        .HasForeignKey("DeckId")
+                        .WithOne()
+                        .HasForeignKey("eKIBRA.Web.Data.StudySession", "DeckId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -1,14 +1,16 @@
 ﻿window.eKIBRA = {
-    addAutoCompleteEvents: ({ inputAspFor, inputAspForHidden, handlerName }) => {
+    addAutoCompleteEvents: ({ inputAspFor, inputAspForHiddenId, aspForDescription, handlerName }) => {
 
         const inputSelector = `input[name="${inputAspFor}"]`;
-        const inputHiddenSelector = `input[name="${inputAspForHidden}"]`;
+        const inputHiddenIdSelector = `input[name="${inputAspForHiddenId}"]`;
+        const anyDescriptionSelector = `[name="${aspForDescription}"]`;
         const selectSelector = `select[name="${inputAspFor}"], datalist[name="${inputAspFor}"]`;
         const selectClickSelector = `${selectSelector} > option`;
 
         const input = $(inputSelector);
         const select = $(selectSelector);
-        const inputTargetKey = $(inputHiddenSelector);
+        const description = $(anyDescriptionSelector);
+        const hiddenKey = $(inputHiddenIdSelector);
 
         if (input.length === 0) {
             console.debug(`fail to find ${inputSelector}`);
@@ -16,7 +18,7 @@
         }
 
         if (select.length === 0) { return; }
-        if (inputTargetKey.length === 0) { return; }
+        if (hiddenKey.length === 0) { return; }
 
         const onClickHandler = function (event) {
             // add selected value [input]
@@ -24,7 +26,9 @@
             input.attr("title", `${event.target.value}`);
 
             // set the membership or id
-            inputTargetKey.val(event.target.value);
+            hiddenKey.val(event.target.value);
+            // set the description (if passed)
+            if (description.length > 0) { description.val(event.target.getAttribute("data-description")); }
 
             // clear and hide [select]
             select.empty().hide();
@@ -35,7 +39,9 @@
             // not char key
             if (event.key.length === 0 || event.key === "Backspace" || event.key === "Delete") {
                 select.empty().hide();
-                inputTargetKey.val("");
+                hiddenKey.val("");
+                // set the description (if passed)
+                if (description.length > 0) { description.val(event.target.getAttribute("data-description")); }
                 input.attr("title", "");
                 return;
             }
@@ -44,7 +50,9 @@
             // minimum of 2 chars
             if (query.length < 2) {
                 select.empty().hide();
-                inputTargetKey.val("");
+                hiddenKey.val("");
+                // set the description (if passed)
+                if (description.length > 0) { description.val(""); }
                 input.attr("title", "");
                 return;
             }
@@ -54,8 +62,8 @@
                 const data = JSON.parse(resp);
 
                 // add all data
-                for (const { Title, Value, Display } of data) {
-                    select.append(`<option title="${Title}" value="${Value}">${Display}</option>`);
+                for (const { Title, Value, Display, Description } of data) {
+                    select.append(`<option title="${Title}" value="${Value}" data-description="${Description}">${Display}</option>`);
                 }
                 // if hidden, show the select
                 if (data.length > 0) {
@@ -67,7 +75,9 @@
         const onFocusInOrOut = function (event) {
             // console.debug(event);
             if (input.val().length === 0) {
-                inputTargetKey.val("");
+                hiddenKey.val("");
+                // set the description (if passed)
+                if (description.length > 0) { description.val(""); }
                 input.attr("title", "");
             }
         }
@@ -85,5 +95,3 @@
         $(document).on("click", selectClickSelector, onClickHandler);
     }
 }
-
-// eKIBRA.addAutoCompleteEvents({ inputAspFor: "Input.TeamPlayerOne", inputAspForHidden: "Input.TeamPlayerOneX", handlerName: "SearchPlayer" });

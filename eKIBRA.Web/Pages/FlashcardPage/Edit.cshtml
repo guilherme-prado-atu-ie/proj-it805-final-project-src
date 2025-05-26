@@ -59,16 +59,16 @@
                 <textarea asp-for="Input.IncorrectFour" class="form-control" placeholder=""></textarea>
                 <label asp-for="Input.IncorrectFour" class="control-label"></label>
             </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Created" class="form-control" autocomplete="off" placeholder="" 
-                           value="@Model.Input.Created.ToString("yyyy-MM-ddTHH:mm")" readonly />
-                    <label asp-for="Input.Created"></label>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Modified" class="form-control" autocomplete="off" placeholder="" 
-                           value="@Model.Input.Modified?.ToString("yyyy-MM-ddTHH:mm")" readonly />
-                    <label asp-for="Input.Modified"></label>
-                </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Created" class="form-control" autocomplete="off" placeholder="" 
+                       value="@Model.Input.Created.ToString("yyyy-MM-ddTHH:mm")" readonly />
+                <label asp-for="Input.Created"></label>
+            </div>
+            <div class="form-floating mb-3">
+                <input asp-for="Input.Modified" class="form-control" autocomplete="off" placeholder="" 
+                       value="@Model.Input.Modified?.ToString("yyyy-MM-ddTHH:mm")" readonly />
+                <label asp-for="Input.Modified"></label>
+            </div>
          
             <button id="save-book-button" type="submit" class="btn btn-primary">Save</button>
         </form>
@@ -79,6 +79,6 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         eKIBRA.addAutoCompleteEvents({ 
-            inputAspFor: "Input.DeckTitle", inputAspForHidden: "Input.DeckId", handlerName: "SearchDeck" });
+            inputAspFor: "Input.DeckTitle", inputAspForHiddenId: "Input.DeckId", handlerName: "SearchDeck" });
     </script>
 }

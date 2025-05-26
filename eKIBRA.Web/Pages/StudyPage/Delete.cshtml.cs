@@ -1,11 +1,12 @@
 using eKIBRA.Web.Data;
+using eKIBRA.Web.Data.Migrations;
 using eKIBRA.Web.Pages.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-namespace eKIBRA.Web.Pages.FlashcardPage
+namespace eKIBRA.Web.Pages.StudyPage
 {
     public class DeleteModel : PageModel
     {
@@ -17,7 +18,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
         [TempData]
         public string StatusMessage { get; set; } = string.Empty;
         [BindProperty]
-        public Flashcard Input { get; set; } = null!;
+        public StudySession Input { get; set; } = null!;
 
         public DeleteModel(
             ILogger<DeleteModel> logger,
@@ -55,9 +56,9 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 return Page();
             }
 
-            var data = await _context.Flashcards
+            var data = await _context.StudySessions
                 .AsNoTracking()
-                .Include(i => i.LinkedDeck)
+                .Include(sq => sq.LinkedDeck)
                 .Where(q => q.Id == id && q.UserId == user.Id)
                 .FirstOrDefaultAsync();
 
@@ -96,9 +97,11 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 return Page();
             }
 
-            var data = await _context.Flashcards
-                .Where(q => q.Id == id && q.UserId == user.Id)
-                .FirstOrDefaultAsync();
+            var data = await _context.StudySessions
+                .Include(sq => sq.LinkedDeck)
+                .Include(sq => sq.FlashcardsProgress)
+                .FirstOrDefaultAsync(fd =>
+                    fd.Id == id && fd.UserId == user.Id);
             if (data is null)
             {
                 StatusMessage = MessageType.Warning
@@ -106,30 +109,18 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 return Page();
             }
 
-            // check if the deck is in use by any study session
-            var inUse = await _context.StudySessions
-                .AsNoTracking()
-                .Include(i => i.FlashcardsProgress)
-                .Where(q =>
-                    q.UserId == user.Id
-                    && q.DeckId == data.DeckId
-                    && q.Status != StudySessionStatus.Completed
-                    && q.FlashcardsProgress.Any(p => p.FlashcardId == data.Id))
-                .AnyAsync();
-
-            if (inUse)
+            foreach (var item in data.FlashcardsProgress)
             {
-                StatusMessage = MessageType.Warning
-                                + "Cannot change a Flashcard's Deck while any Study Session is not Completed.";
-                return Page();
+                // updating IsDeleted to soft-deleted items
+                item.Modified = DateTime.UtcNow;
+                item.ModifierUserId = user.Id;
+                item.IsDeleted = true;
             }
 
-            // replacing the title with a Guid to avoid duplicate key error for soft-deleted items
+            // updating Status and IsDeleted soft-deleted items
             data.Modified = DateTime.UtcNow;
             data.ModifierUserId = user.Id;
-            data.Question = "Deleted " + data.Id;
-            data.Answer = "Deleted " + data.Id;
-            data.Incorrects = [];
+            data.Status = StudySessionStatus.Completed;
             data.IsDeleted = true;
 
             await _context.SaveChangesAsync();

@@ -1,0 +1,171 @@
+@page
+@model eKIBRA.Web.Pages.StudyPage.IndexModel
+@{
+    ViewData["Title"] = "List";
+}
+<h4>Study Sessions List</h4>
+<p>
+    <a asp-page="Create">Create New</a> |
+    <a asp-page="./Index">Back to full List</a>
+</p>
+<hr />
+
+<partial name="_ValidationAuthenticationCheckPartial" />
+<partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
+
+@{
+    var prevDisabled = !Model.Data.EntityList.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Data.EntityList.HasNextPage ? "disabled" : "";
+}
+
+<div class="row align-items-center">
+    <div class="col">
+        <form asp-page="./Index" method="get">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <input asp-for="@Model.Filter.TitleFilter" class="form-control" autocomplete="off" 
+                           placeholder="Title" name="searchTitle" value="@Model.Filter.TitleFilter" />
+                </div>
+                <div class="col-auto">
+                    <select asp-for="@Model.Filter.StatusFilter" class="form-control"
+                            asp-items="Html.GetEnumSelectList<StudySessionStatus>()"
+                            placeholder="Status" name="searchStatus" >
+                        <option value="">Select a value</option>
+                    </select>
+                </div>
+                <div class="col">
+                    <input type="submit" value="Filter" class="btn btn-primary" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-auto">
+        <a asp-page="./Index"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex - 1)"
+           class="btn btn-primary @prevDisabled">
+            Previous
+        </a>
+
+        <button class="btn btn-dark">@Model.Data.EntityList.PageIndex</button>
+
+        <a asp-page="./Index"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex + 1)"
+           class="btn btn-primary @nextDisabled">
+            Next
+        </a>
+    </div>
+</div>
+<br />
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>
+                <a asp-page="./Index"
+                   asp-route-sortedBy="@Model.Filter.TitleSort"
+                   asp-route-titleFilter="@Model.Filter.TitleFilter"
+                   asp-route-statusFilter="@Model.Filter.StatusFilter"
+                   asp-route-pageIndex="@Model.Data.EntityList.PageIndex">
+                    Title
+                </a>
+            </th>
+            <th>
+                <a asp-page="./Index"
+                   asp-route-sortedBy="@Model.Filter.StatusSort"
+                   asp-route-titleFilter="@Model.Filter.TitleFilter"
+                   asp-route-statusFilter="@Model.Filter.StatusFilter"
+                   asp-route-pageIndex="@Model.Data.EntityList.PageIndex">
+                    Status
+                </a>
+            </th>
+            <th>
+                <a asp-page="./Index"
+                   asp-route-sortedBy="@Model.Filter.CreatedSort"
+                   asp-route-titleFilter="@Model.Filter.TitleFilter"
+                   asp-route-statusFilter="@Model.Filter.StatusFilter"
+                   asp-route-pageIndex="@Model.Data.EntityList.PageIndex">
+                    Created
+                </a>
+            </th>
+            <th>
+                <a asp-page="./Index"
+                   asp-route-sortedBy="@Model.Filter.ModifiedSort"
+                   asp-route-titleFilter="@Model.Filter.TitleFilter"
+                   asp-route-statusFilter="@Model.Filter.StatusFilter"
+                   asp-route-pageIndex="@Model.Data.EntityList.PageIndex">
+                    Modified
+                </a>
+            </th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        @foreach (var item in Model.Data.EntityList)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LinkedDeck.Title)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status)
+                </td>
+                <td>
+                    @item.Created.ToString("dd.MMM.yyyy HH:mm")
+                </td>
+                <td>
+                    @item.Modified?.ToString("dd.MMM.yyyy HH:mm")
+                </td>
+                <td>
+                    @{
+                        var studyStatus = item.Status == StudySessionStatus.Completed;
+                        var studyDisabled = studyStatus ? "disabled" : "";
+                        var studyBtn = studyStatus ? "btn-outline-secondary" : "btn-success";
+                        
+                        <a asp-page="./Study" asp-route-id="@item.Id" 
+                           class="btn @studyBtn btn-sm @studyDisabled">Study</a><span> | </span>
+                        
+                        <a asp-page="./Details" asp-route-id="@item.Id" 
+                           class="btn btn-link btn-sm">Details</a><span> | </span>
+                        
+                        <a asp-page="./Delete" asp-route-id="@item.Id" 
+                           class="btn btn-link btn-sm">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+<div class="row align-items-center">
+    <div class="col"></div>
+    <div class="col-md-auto">
+        <a asp-page="./Index"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex - 1)"
+           class="btn btn-primary @prevDisabled">
+            Previous
+        </a>
+
+        <button class="btn btn-dark">@Model.Data.EntityList.PageIndex</button>
+
+        <a asp-page="./Index"
+           asp-route-sortedBy="@Model.Filter.SortedBy"
+           asp-route-titleFilter="@Model.Filter.TitleFilter"
+           asp-route-statusFilter="@Model.Filter.StatusFilter"
+           asp-route-pageIndex="@(Model.Data.EntityList.PageIndex + 1)"
+           class="btn btn-primary @nextDisabled">
+            Next
+        </a>
+    </div>
+</div>

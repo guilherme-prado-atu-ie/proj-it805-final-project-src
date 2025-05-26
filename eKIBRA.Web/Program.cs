@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using eKIBRA.Web.Data;
+using eKIBRA.Web.SrmAlgorithm;
 
 namespace eKIBRA.Web;
 
@@ -20,6 +21,9 @@ public class Program
 
         builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
             .AddEntityFrameworkStores<ApplicationDbContext>();
+
+        builder.Services.AddScoped<ISpacedRepetitionImplementation, SpacedRepetitionEKibraV1>();
+
         builder.Services.AddRazorPages();
 
         var app = builder.Build();

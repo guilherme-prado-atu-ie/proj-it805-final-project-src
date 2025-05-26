@@ -1,18 +1,20 @@
 using System.Text.Json;
 using eKIBRA.Web.Data;
 using eKIBRA.Web.Pages.Shared;
+using eKIBRA.Web.SrmAlgorithm;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
-namespace eKIBRA.Web.Pages.FlashcardPage
+namespace eKIBRA.Web.Pages.StudyPage
 {
     public class CreateModel : PageModel
     {
         private readonly ILogger<CreateModel> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly ISpacedRepetitionImplementation _srm;
         private readonly UserManager<ApplicationUser> _user;
         private readonly SignInManager<ApplicationUser> _signin;
 
@@ -21,16 +23,18 @@ namespace eKIBRA.Web.Pages.FlashcardPage
         public string StatusMessage { get; set; } = string.Empty;
 
         [BindProperty]
-        public CreateViewModel Input { get; set; } = new() { DeckTitle = string.Empty };
+        public CreateViewModel Input { get; set; } = null!;
 
         public CreateModel(
             ILogger<CreateModel> logger,
             ApplicationDbContext context,
+            ISpacedRepetitionImplementation srm,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager)
         {
             _logger = logger;
             _context = context;
+            _srm = srm;
             _user = userManager;
             _signin = signInManager;
         }
@@ -59,14 +63,29 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
+
+            var inUse = _context.StudySessions
+                .AsNoTracking()
+                .Where(q =>
+                    q.UserId == user.Id
+                    && q.Status != StudySessionStatus.Completed)
+                .Select(s => new { s.DeckId });
+
             var query = await _context.Decks
                 .AsNoTracking()
                 .Where(q =>
                     q.UserId == user.Id
-                    && q.Title.Contains(search))
+                    && q.Title.Contains(search)
+                    && !inUse
+                        .Any(s => s.DeckId == q.Id))
                 .Select(s => new { Title = s.Title, Description = s.Description, Display = s.Title, Value = s.Id })
-                .OrderBy(o => o.Title)
+                .OrderBy(o => o.Display)
                 .ToListAsync();
+
+            if (query is { Count: 0 })
+            {
+                query.Add(new { Title = "No results", Description = "No results", Display = "No results", Value = string.Empty }!);
+            }
 
             var json = JsonSerializer.Serialize(query);
             return new JsonResult(json);
@@ -92,26 +111,38 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
+            // Check for existing Non-Completed Study Sessions
+            var hasNonCompleted = await _context.StudySessions
+                .AsNoTracking()
+                .Where(q =>
+                    q.UserId == user.Id
+                    && q.DeckId == Input.DeckId
+                    && q.Status != StudySessionStatus.Completed)
+                .AnyAsync();
 
-            var incorrects = new[]
-                { Input.IncorrectOne, Input.IncorrectTwo, Input.IncorrectThree, Input.IncorrectFour }
-                .Where(q => !string.IsNullOrWhiteSpace(q))
-                .ToList();
-
-            var data = new Flashcard
+            if (hasNonCompleted)
             {
-                Id = Guid.NewGuid()
-                    .ToString(),
+                StatusMessage = MessageType.Warning
+                                + "You have a non-completed Study Session. Please complete it before creating a new one.";
+                return Page();
+            }
+
+            var newId = Guid.NewGuid().ToString();
+            var srmParams = new StudySessionParam
+            { Id = newId, UserId = user.Id, DeckId = Input.DeckId };
+
+            var data = new StudySession
+            {
+                Id = newId,
                 UserId = user.Id,
                 DeckId = Input.DeckId,
-                Question = Input.Question,
-                Answer = Input.Anwser,
-                Incorrects = incorrects
+                Version = Guid.NewGuid(), // to avoid concurrency issues when updating metadata
+                FlashcardsProgress = await _srm.CreateListOfFlashcardProgress(srmParams)
             };
 
-            _context.Flashcards.Add(data);
             try
             {
+                _context.StudySessions.Add(data);
                 await _context.SaveChangesAsync();
             }
             catch (Exception e)
@@ -122,29 +153,31 @@ namespace eKIBRA.Web.Pages.FlashcardPage
              * change the behavior to stay on the page
              * and notify the user the record was created
              */
-            StatusMessage = MessageType.Success + "Flashcard created.";
+            StatusMessage = MessageType.Success + "Study Session created.";
             return Page();
         }
+
         public IActionResult HandleCreateException(Exception e)
         {
             if (e is DbUpdateException
                 && e.InnerException
                     is SqlException { Number: 547 or 2601 or 2627 })
                 /*
-                 * Cannot insert a duplicate key row on 'dbo.Flashcards' because of a unique index.
-                 * The duplicate key value is (flashcard 01).
+                 * Cannot insert a duplicate key row on 'dbo.StudySessions' because of a unique index.
+                 * The duplicate key value is (deck 01).
                  *
                  * 547 - Constraint check violation
                  * 2601 - Duplicated key row error
                  * 2627 - Unique constraint error
                  */
                 StatusMessage = MessageType.Warning
-                                + $"Cannot create a new Flashcard. Question '{Input.Question}' is duplicated.";
+                                + $"Cannot create a new Study Session with selected Deck '{Input.DeckTitle}'." +
+                                "The Deck is already in use by another Study Session.";
             else
                 StatusMessage = MessageType.Error
-                                + "Fail to create a new Flashcard.";
+                                + "Fail to create a new Study Session.";
 
-            _logger.LogError(e, "An error occurred while creating a new Flashcard.");
+            _logger.LogError(e, "An error occurred while creating a new Study Session.");
             return Page();
         }
     }

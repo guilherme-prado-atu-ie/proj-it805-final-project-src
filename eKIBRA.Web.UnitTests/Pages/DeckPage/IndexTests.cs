@@ -12,7 +12,7 @@ using Moq;
 
 namespace eKIBRA.Web.UnitTests.Pages.DeckPage;
 
-public sealed class IndexTest : IDisposable
+public sealed class IndexTests : IDisposable
 {
     private readonly Mock<ILogger<IndexModel>> _mockLogger;
     private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
@@ -24,7 +24,7 @@ public sealed class IndexTest : IDisposable
     private readonly ApplicationUser _anotherUser;
 
 
-    public IndexTest()
+    public IndexTests()
     {
         // Setup in-memory database
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()

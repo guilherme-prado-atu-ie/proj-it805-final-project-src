@@ -52,7 +52,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 .Where(q =>
                     q.UserId == user.Id
                     && q.Title.Contains(search))
-                .Select(s => new { Title = s.Title, Display = s.Title, Value = s.Id })
+                .Select(s => new { Title = s.Title, Description = s.Description, Display = s.Title, Value = s.Id })
                 .OrderBy(o => o.Title)
                 .ToListAsync();
 
@@ -140,12 +140,30 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             }
 
             var data = await _context.Flashcards
-                .FirstOrDefaultAsync(fd =>
-                    fd.Id == Input.Id && fd.UserId == user.Id);
+                .Where(q => q.Id == Input.Id && q.UserId == user.Id)
+                .FirstOrDefaultAsync();
             if (data is null)
             {
                 StatusMessage = MessageType.Warning
                                  + "The record no longer exists.";
+                return Page();
+            }
+
+            // check if the deck is in use by any study session
+            var inUse = await _context.StudySessions
+                .AsNoTracking()
+                .Include(i => i.FlashcardsProgress)
+                .Where(q =>
+                    q.UserId == user.Id
+                    && q.DeckId == data.DeckId
+                    && q.Status != StudySessionStatus.Completed
+                    && q.FlashcardsProgress.Any(p => p.FlashcardId == data.Id))
+                .AnyAsync();
+
+            if (inUse)
+            {
+                StatusMessage = MessageType.Warning
+                                + "Cannot change a Flashcard's Deck while any Study Session is not Completed.";
                 return Page();
             }
 

@@ -105,8 +105,8 @@ namespace eKIBRA.Web.Pages.DeckPage
             }
 
             var data = await _context.Decks
-                .FirstOrDefaultAsync(fd =>
-                    fd.Id == Input.Id && fd.UserId == user.Id);
+                .Where(q => q.Id == Input.Id && q.UserId == user.Id)
+                .FirstOrDefaultAsync();
             if (data is null)
             {
                 StatusMessage = MessageType.Warning

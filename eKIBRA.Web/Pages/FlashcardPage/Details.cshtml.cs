@@ -55,9 +55,8 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             var data = await _context.Flashcards
                 .AsNoTracking()
                 .Include(i => i.LinkedDeck)
-                .FirstOrDefaultAsync(fd =>
-                    fd.Id == id && fd.UserId == user.Id);
-
+                .Where(q => q.Id == id && q.UserId == user.Id)
+                .FirstOrDefaultAsync();
             if (data is null)
             {
                 StatusMessage = MessageType.Warning

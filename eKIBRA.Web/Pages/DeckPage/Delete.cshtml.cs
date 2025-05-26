@@ -58,8 +58,8 @@ namespace eKIBRA.Web.Pages.DeckPage
 
             var data = await _context.Decks
                 .AsNoTracking()
-                .FirstOrDefaultAsync(fd =>
-                    fd.Id == id && fd.UserId == user.Id);
+                .Where(q => q.Id == id && q.UserId == user.Id)
+                .FirstOrDefaultAsync();
 
             if (data is null)
             {
@@ -98,8 +98,8 @@ namespace eKIBRA.Web.Pages.DeckPage
 
             var data = await _context.Decks
                 .Include(sq => sq.Flashcards)
-                .FirstOrDefaultAsync(fd =>
-                    fd.Id == id && fd.UserId == user.Id);
+                .Where(q => q.Id == id && q.UserId == user.Id)
+                .FirstOrDefaultAsync();
             if (data is null)
             {
                 StatusMessage = MessageType.Warning
@@ -107,14 +107,18 @@ namespace eKIBRA.Web.Pages.DeckPage
                 return Page();
             }
 
-            foreach (var flashcard in data.Flashcards)
+            foreach (var item in data.Flashcards)
             {
                 // replacing the Question with a Guid to avoid duplicate key error for soft-deleted items
-                flashcard.Question = "Deleted " + flashcard.Id;
-                flashcard.IsDeleted = true;
+                item.Modified = DateTime.UtcNow;
+                item.ModifierUserId = user.Id;
+                item.Question = "Deleted " + item.Id;
+                item.IsDeleted = true;
             }
 
             // replacing the title with a Guid to avoid duplicate key error for soft-deleted items
+            data.Modified = DateTime.UtcNow;
+            data.ModifierUserId = user.Id;
             data.Title = "Deleted " + data.Id;
             data.IsDeleted = true;
 

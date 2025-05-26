@@ -37,18 +37,22 @@
             <div class="form-floating mb-3">
                 <textarea asp-for="Input.IncorrectOne" class="form-control" placeholder=""></textarea>
                 <label asp-for="Input.IncorrectOne" class="control-label"></label>
+                <span asp-validation-for="Input.IncorrectOne" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <textarea asp-for="Input.IncorrectTwo" class="form-control" placeholder=""></textarea>
                 <label asp-for="Input.IncorrectTwo" class="control-label"></label>
+                <span asp-validation-for="Input.IncorrectTwo" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <textarea asp-for="Input.IncorrectThree" class="form-control" placeholder=""></textarea>
                 <label asp-for="Input.IncorrectThree" class="control-label"></label>
+                <span asp-validation-for="Input.IncorrectThree" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
                 <textarea asp-for="Input.IncorrectFour" class="form-control" placeholder=""></textarea>
                 <label asp-for="Input.IncorrectFour" class="control-label"></label>
+                <span asp-validation-for="Input.IncorrectFour" class="text-danger"></span>
             </div>
             <button id="save-book-button" type="submit" class="btn btn-primary">Save</button>
         </form>
@@ -59,6 +63,6 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         eKIBRA.addAutoCompleteEvents({ 
-            inputAspFor: "Input.DeckTitle", inputAspForHidden: "Input.DeckId", handlerName: "SearchDeck" });
+            inputAspFor: "Input.DeckTitle", inputAspForHiddenId: "Input.DeckId", handlerName: "SearchDeck" });
     </script>
 }
