@@ -5,8 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using static System.String;
 
 namespace eKIBRA.Web.Pages.StudyPage;
+
+using Navigation = (string userId, string studySessionId, FlashcardProgress? item);
 
 public class StudyModel : PageModel
 {
@@ -14,10 +17,28 @@ public class StudyModel : PageModel
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _user;
     private readonly SignInManager<ApplicationUser> _signin;
+    private const string NoResult = "No result";
+    [TempData] public string StatusMessage { get; set; } = Empty;
 
-    [TempData] public string StatusMessage { get; set; } = string.Empty;
-
-    [BindProperty] public FlashcardProgress Input { get; set; } = null!;
+    [BindProperty] 
+    public StudyViewModel Input { get; set; } = new()
+    {
+        UserId = Empty,
+        StudySessionId = Empty,
+        DeckId = Empty,
+        FlashcardProgressId = Empty,
+        FlashcardId = Empty,
+        
+        DeckTitle = Empty,
+        Question = Empty,
+        Answer = Empty,
+        
+        ShowRevealButton = false,
+        ShowAnwserText = false,
+        
+        Version = Guid.Empty,
+        Command = StudyViewModelCommand.Get
+    };
 
     public StudyModel(
         ILogger<StudyModel> logger,
@@ -34,40 +55,15 @@ public class StudyModel : PageModel
 
     public async Task OnGetAsync(string? id)
     {
-        StatusMessage = string.Empty;
-
-        // User authenticated - validation
-        if (!_signin.IsSignedIn(User))
-        {
-            RedirectToPage("/Account/Login", new { area = "Identity" });
-            Input = null!;
-            return;
-        }
-
-        // User retrieve - validation
-        var user = await _user.GetUserAsync(User);
-        if (user is null)
-        {
-            StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
-            Input = null!;
-            return;
-        }
-
-        var item = await _context.FlashcardsProgress
-            .AsNoTracking()
-            .Include(i => i.LinkedDeck)
-            .Include(i => i.LinkedFlashcard)
-            .Where(q => q.StudySessionId == id && q.UserId == user.Id)
-            .FirstOrDefaultAsync();
-
-        Input = item ?? null!;
-
-        // add logic to retrieve flashcards here
+        StatusMessage = Empty;
+        if (id is null) return;
+        
+        var user = await ValidateUserAuthentication();
+        if(user is null) return;
+        
+        StudyCommandHandlerGateway(await GetFlashcardProgress(user.Id, id));
     }
     
-    
-
-    /*
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
@@ -76,75 +72,144 @@ public class StudyModel : PageModel
                             + "Invalid Deck. Check the required fields or try entering new values.";
             return Page();
         }
-
-        // User authenticated - validation
-        if (!_signin.IsSignedIn(User))
+        
+        var data = 
+            await GetFlashcardProgress(userId: Input.UserId, studySessionId: Input.StudySessionId);
+        
+        // if diff can use to logic avoid recount
+        // Input.Version
+        // item.Version
+        
+        if (data.item is null)
         {
-            return RedirectToPage("/Account/Login", new { area = "Identity" });
-        }
-
-        // User retrieve - validation
-        var user = await _user.GetUserAsync(User);
-        if (user is null)
-        {
-            StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
+            // msg do somethings
             return Page();
         }
-
-        var incorrects = new[]
-                { Input.IncorrectOne, Input.IncorrectTwo, Input.IncorrectThree, Input.IncorrectFour }
-            .Where(q => !string.IsNullOrWhiteSpace(q))
-            .ToList();
-
-        var data = new Flashcard
-        {
-            Id = Guid.NewGuid()
-                .ToString(),
-            UserId = user.Id,
-            DeckId = Input.DeckId,
-            Question = Input.Question,
-            Answer = Input.Anwser,
-            Incorrects = incorrects
-        };
-
-        _context.Flashcards.Add(data);
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception e)
-        {
-            return HandleCreateException(e);
-        }
-
-        /*
-         * change the behavior to stay on the page
-         * and notify the user the record was created
-         #1#
-        StatusMessage = MessageType.Success + "Flashcard created.";
+        
+        StudyCommandHandlerGateway(data);
+        
         return Page();
     }
 
-    public IActionResult HandleCreateException(Exception e)
+    private async Task<ApplicationUser?> ValidateUserAuthentication()
     {
-        if (e is DbUpdateException
-            && e.InnerException
-                is SqlException { Number: 547 or 2601 or 2627 })
-            /*
-             * Cannot insert a duplicate key row on 'dbo.Flashcards' because of a unique index.
-             * The duplicate key value is (flashcard 01).
-             *
-             * 547 - Constraint check violation
-             * 2601 - Duplicated key row error
-             * 2627 - Unique constraint error
-             #1#
-            StatusMessage = MessageType.Warning
-                            + $"Cannot create a new Flashcard. Question '{Input.Question}' is duplicated.";
-        else
-            StatusMessage = MessageType.Error
-                            + "Fail to create a new Flashcard.";
+        // User authenticated - validation
+        if (!_signin.IsSignedIn(User))
+        {
+            RedirectToPage("/Account/Login", new { area = "Identity" });
+            Input = null!;
+            return null;
+        }
+        
+        // User retrieve - validation
+        var user = await _user.GetUserAsync(User);
+        if (user is not null) return user;
+        StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
+        Input = null!;
+        return null;
+    }
+    
+    private void StudyCommandHandlerGateway(Navigation data)
+    {
+        switch (Input.Command)
+        {
+            case StudyViewModelCommand.Get:
+                GetStudyCommandHandler(data);
+                break;
+            case StudyViewModelCommand.Remember:
+                break;
+            case StudyViewModelCommand.Forgot:
+                break;
+            case StudyViewModelCommand.Reveal:
+                RevealCommandHandler(data);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+    
+    private void GetStudyCommandHandler(Navigation data)
+    {
+        var (userId, studySessionId, item) = data;
+        if (item is null)
+        {
+            Input = new StudyViewModel
+            {
+                UserId = userId,
+                StudySessionId = studySessionId,
+                
+                DeckId = Empty,
+                FlashcardProgressId = Empty,
+                FlashcardId = Empty,
 
-        _logger.LogError(e, "An error occurred while creating a new Flashcard.");
-        return Page();
-    }*/
+                DeckTitle = NoResult,
+                Answer = NoResult,
+                Question = NoResult,
+                
+                ShowRevealButton = true,
+                ShowAnwserText = false,
+                
+                Version = Guid.Empty,
+                Command = StudyViewModelCommand.Get
+            };
+            return;
+        }
+        var showReveal = item is { Remembers: 0 };
+        Input = new StudyViewModel
+        {
+            UserId = userId,
+            StudySessionId = studySessionId,
+            DeckId = item.LinkedDeck.Id,
+            FlashcardId = item.LinkedFlashcard.Id,
+            FlashcardProgressId = item.Id,
+
+            DeckTitle = item.LinkedDeck.Title,
+            Question = item.LinkedFlashcard.Question,
+            Answer = item.LinkedFlashcard.Answer,
+
+            ShowRevealButton = showReveal,
+            ShowAnwserText = !showReveal,
+            
+            Version = item.Version,
+            
+            Command = StudyViewModelCommand.Get
+        };
+    }
+
+    private void RevealCommandHandler(Navigation data)
+    {
+        var (userId, studySessionId, item) = data;
+        Input.UserId = userId;
+        Input.StudySessionId = studySessionId;                
+        
+        if (item is null) { return; }
+        
+        Input.DeckId = item.LinkedDeck.Id;
+        Input.FlashcardId = item.LinkedFlashcard.Id;
+        Input.FlashcardProgressId = item.Id;
+                
+        Input.DeckTitle = item.LinkedDeck.Title;
+        Input.Question = item.LinkedFlashcard.Question;
+        Input.Answer = item.LinkedFlashcard.Answer;
+    }
+
+
+    private async Task<Navigation> GetFlashcardProgress(string userId, string studySessionId)
+    {
+        var item = await _context.FlashcardsProgress
+            .AsNoTracking()
+            .Include(i => i.LinkedDeck)
+            .Include(i => i.LinkedFlashcard)
+            .Where(q => 
+                q.UserId == userId
+                && q.StudySessionId == studySessionId
+                && q.Remembers == 0)
+            .OrderBy(q => q.Sequence)
+            .ThenByDescending(q=> q.Reveals)
+            .FirstOrDefaultAsync();
+        
+        return new Navigation(userId, studySessionId, item);
+    }
+
+
 }
