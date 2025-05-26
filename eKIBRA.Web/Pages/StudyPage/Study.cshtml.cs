@@ -75,33 +75,50 @@ public class StudyModel : PageModel
         if (!ModelState.IsValid)
         {
             StatusMessage = MessageType.Error
-                            + "Invalid Study Flashcard. Check the required fields or try again later.";
+                            + "Invalid Study Flashcard." +
+                            " Try open it from the Study Session list.";
             return Page();
         }
         
         var data = 
             await GetFlashcardProgress(Input.UserId, Input.StudySessionId, Input.FlashcardProgressId);
-        
-        // if diff can use to logic avoid recount
-        // Input.Version
-        // item.Version
-        
+
         if (data.Item is null)
         {
-            // msg do somethings
+            StatusMessage = MessageType.Info
+                            + "Invalid Study Flashcard." +
+                            " Try open it from the Study Session list.";
+            
+            Input.DeckTitle = NoResult;
+            Input.ShowRevealButton = true;
+            Input.NoQuestionLeft = true;
+            return Page();
+        } 
+            
+        if (data.QuestionsProgress > data.TotalOfQuestions)
+        {
+            StatusMessage = MessageType.Info
+                            + "No Flashcards available for this Study Session." +
+                            " Please create a new Study session.";
+            
+            Input.DeckTitle = NoResult;
+            Input.ShowRevealButton = true;
+            Input.NoQuestionLeft = true;
             return Page();
         }
         
         await StudyCommandHandlerGateway(data);
 
-        return Input.Command switch
+        switch (Input.Command)
         {
-            StudyViewModelCommand.Get => Page(),
-            StudyViewModelCommand.Remember => Page(), // RedirectToPage("./Study", new { id = Input.StudySessionId }), //Page(),
-            StudyViewModelCommand.Forgot => Page(), //RedirectToPage("./Study", new { id = Input.StudySessionId }), //Page(),
-            StudyViewModelCommand.Reveal => Page(),
-            _ => Page(), //RedirectToPage("/StudyPage/Study", new { id = Input.StudySessionId }) //Page(),
-        };
+            case StudyViewModelCommand.Get:
+            case StudyViewModelCommand.Remember: // RedirectToPage("./Study", new { id = Input.StudySessionId }), //Page(),
+            case StudyViewModelCommand.Forgot: //RedirectToPage("./Study", new { id = Input.StudySessionId }), //Page(),
+            case StudyViewModelCommand.Reveal:
+            default:
+                return Page();         //RedirectToPage("/StudyPage/Study", new { id = Input.StudySessionId }) //Page(),
+        }
+
     }
 
     private async Task<ApplicationUser?> ValidateUserAuthentication()
@@ -166,7 +183,7 @@ public class StudyModel : PageModel
 
                 NoQuestionLeft = true,
                 
-                ShowRevealButton = false,
+                ShowRevealButton = true,
                 ShowAnwserText = false,
                 
                 Status = StudyViewModelStatus.Open,
@@ -214,7 +231,7 @@ public class StudyModel : PageModel
         var (userId, studySessionId, 
             questionProgress, totalOfQuestions, item) = data;
 
-        if (item is null) { return; }
+        if (item is null || questionProgress > totalOfQuestions) { return; }
 
         Input.UserId = userId;
         Input.StudySessionId = studySessionId;
@@ -295,7 +312,7 @@ public class StudyModel : PageModel
         var (userId, studySessionId, 
             questionProgress, totalOfQuestions, item) = data;
 
-        if (item is null) { return; }
+        if (item is null || questionProgress > totalOfQuestions) { return; }
         
         var version = Guid.NewGuid();
         var remembersAt = DateTime.UtcNow;
@@ -389,7 +406,7 @@ public class StudyModel : PageModel
         var (userId, studySessionId, 
             questionProgress, totalOfQuestions, item) = data;
 
-        if (item is null) { return; }
+        if (item is null || questionProgress > totalOfQuestions) { return; }
         
         Input.UserId = userId;
         Input.StudySessionId = studySessionId;

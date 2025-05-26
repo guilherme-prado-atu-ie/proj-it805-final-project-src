@@ -12,7 +12,7 @@ public class StudyViewModel
     public  string DeckTitle { get; set; }= string.Empty;
     public string Question { get; set; }= string.Empty;
     public string Answer { get; set; } = string.Empty;
-    public bool NoQuestionLeft { get; set; } = false;
+    public bool NoQuestionLeft { get; set; }
     public bool ShowRevealButton { get; set; }
     public bool ShowAnwserText { get; set; }
     public int TotalOfQuestions { get; set; }

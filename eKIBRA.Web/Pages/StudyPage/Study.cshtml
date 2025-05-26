@@ -8,9 +8,13 @@
 
 @{ if (Model.Input is null || string.IsNullOrWhiteSpace(Model.Input.StudySessionId)) return; }
 
-<h4>Studying Session - Deck (@Html.DisplayFor(model => model.Input.DeckTitle))</h4>
+<h4>Studying Session</h4>
 
 <partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
+
+@{
+    var noQuestionLeft = Model.Input.NoQuestionLeft ? "disabled" : "";
+}
 
 <hr />
 
@@ -32,28 +36,46 @@
                 <div class="card-deck mb-3 text-center">
                     <div class="card mb-4 box-shadow">
                         <div class="card-header">
+                            <div class="card-subtitle">Deck (@Model.Input.DeckTitle)</div>
                             <h5 class="my-0 font-weight-normal">
-                                Question @Model.Input.QuestionsProgress of @Model.Input.TotalOfQuestions 
+                                Question @Model.Input.QuestionsProgress of @Model.Input.TotalOfQuestions
                             </h5>
+
                         </div>
+                        
                         <div class="card-body">
-                            @Model.Input.Question
+                            @if (Model.Input.NoQuestionLeft)
+                            {
+                                <span>No Questions Left</span>
+                            }
+                            @if (!Model.Input.NoQuestionLeft)
+                            {
+                                @Model.Input.Question
+                            }
                             <hr/>
-                            @if (Model.Input.ShowAnwserText) { @Model.Input.Answer }
+                            @if (!Model.Input.ShowAnwserText)
+                            {
+                                <span>To Reveal</span>
+                            }
+                            @if (Model.Input.ShowAnwserText)
+                            {
+                                @Model.Input.Answer
+                            }
+                        </div>
+                        
+                        <div class="card-footer">
                             @if (Model.Input.ShowRevealButton)
                             {
                                 <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Reveal"
-                                       class="btn btn-lg btn-block btn-outline-primary" />
+                                       class="btn btn-lg btn-block btn-outline-primary @noQuestionLeft" />
                             }
-                        </div>
-                        <div class="card-footer">
                             @if (!Model.Input.ShowRevealButton)
                             {
                                 <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Remember"
-                                       class="btn btn-lg btn-block btn-outline-success" />
-                                
+                                       class="btn btn-lg btn-block btn-outline-success @noQuestionLeft"/>
+
                                 <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Forgot"
-                                       class="btn btn-lg btn-block btn-outline-danger" />
+                                       class="btn btn-lg btn-block btn-outline-danger @noQuestionLeft"/>
                             }
                         </div>
                     </div>
