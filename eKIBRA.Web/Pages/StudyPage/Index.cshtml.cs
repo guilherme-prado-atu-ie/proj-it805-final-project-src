@@ -62,7 +62,7 @@ namespace eKIBRA.Web.Pages.StudyPage
             }
 
             Filter.SortedBy = sortedBy;
-            Filter.TitleSort = string.IsNullOrEmpty(sortedBy) ? "title_desc" : "";
+            Filter.TitleSort = sortedBy == "title" ? "title_desc" : "title";
             Filter.StatusSort = sortedBy == "description" ? "description_desc" : "description";
             Filter.CreatedSort = sortedBy == "created" ? "created_desc" : "created";
             Filter.ModifiedSort = sortedBy == "modified" ? "modified_desc" : "modified";
@@ -107,7 +107,9 @@ namespace eKIBRA.Web.Pages.StudyPage
                 "status_desc" => query.OrderByDescending(q => q.Status),
 
                 "title_desc" => query.OrderByDescending(q => q.LinkedDeck.Title),
-                _ => query.OrderBy(q => q.LinkedDeck.Title),
+                "title" => query.OrderBy(q => q.LinkedDeck.Title),
+                
+                _ => query.OrderByDescending(q => q.Created),
             };
 
             Data.EntityList = await PaginatedList<StudySession>.CreateAsync(
