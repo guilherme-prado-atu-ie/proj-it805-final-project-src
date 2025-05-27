@@ -21,6 +21,8 @@ public class StudyViewModel
     public Guid VersionReveal { get; set; } = Guid.Empty;
     public Guid VersionFeedback { get; set; } = Guid.Empty;
     public required StudyViewModelStatus Status { get; set; } = StudyViewModelStatus.Open;
+
+    public required DifficultyLevel Level { get; set; } = DifficultyLevel.Medium;
 }
 public enum StudyViewModelStatus
 {
