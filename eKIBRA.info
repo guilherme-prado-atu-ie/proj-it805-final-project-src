@@ -1,5 +1,5 @@
 ﻿name:               eKIBRA
-version:            0.0.19
+version:            0.0.20
 synopsis:           A software implementation of Spaced Repetition Method (SRM) for learners 
 description:        Allows learners to include study content for further use in solo practice sessions ruled by SRM.
                     Providing analysis at the end of each section to assist learners in identifying weaknesses in their 
