@@ -19,6 +19,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
         FlashcardModelBuilder<Flashcard>.SetModel(builder);
         StudySessionModelBuilder<StudySession>.SetModel(builder);
         FlashcardProgressModelBuilder<FlashcardProgress>.SetModel(builder);
+        TestSessionModelBuilder<TestSession>.SetModel(builder);
+        TestSessionResponseModelBuilder<TestSessionResponse>.SetModel(builder);
     }
 
     public override DbSet<ApplicationUser> Users { get; set; }
@@ -26,5 +28,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Flashcard> Flashcards { get; set; }
     public DbSet<StudySession> StudySessions { get; set; }
     public DbSet<FlashcardProgress> FlashcardsProgress { get; set; }
+
+    public DbSet<TestSession> TestSessions { get; set; }
+
+    public DbSet<TestSessionResponse> TestSessionsResponse { get; set; }
 
 }

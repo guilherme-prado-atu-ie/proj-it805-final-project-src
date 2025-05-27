@@ -1,0 +1,182 @@
+@page
+@model eKIBRA.Web.Pages.TestPage.SessionModel
+
+@{
+    ViewData["Title"] = "Test Session";
+}
+
+<partial name="_ValidationAuthenticationCheckPartial"/>
+<partial name="_ValidationStatusMessagePartial" for="StatusMessage"/>
+
+@{ if (string.IsNullOrWhiteSpace(Model.Data.TestSessionId)) return; }
+<div class="container mt-4">
+
+    <button type="button" class="btn btn-outline-danger me-2 mb-3" data-bs-toggle="modal"
+            data-bs-target="#exitModal">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg me-2"
+             viewBox="0 0 16 16">
+            <path
+                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+        </svg>
+        Exit Test
+    </button>
+
+    <!-- Test Header -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h5 class="mb-0">@Model.Data.Title</h5>
+                    <small>@Model.Data.Description</small>
+                </div>
+                <div class="col-md-4">
+                    <div class="text-center">
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-dark" role="progressbar"
+                                 style="width: @(((double)Model.Data.CurrentFlashcard / Model.Data.TotalFlashcards) * 100)%"></div>
+                        </div>
+                        <small>Question @Model.Data.CurrentFlashcard of @Model.Data.TotalFlashcards</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Question Card -->
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <!-- Question Number & Type -->
+            <div class="row mb-3">
+                <div class="col">
+                    <span class="badge bg-secondary">Question @Model.Data.CurrentFlashcard</span>
+                </div>
+            </div>
+
+            <!-- Question Text -->
+            <div class="mb-4">
+                <h4 class="card-title">@Html.Raw(Model.Data.Question)</h4>
+            </div>
+
+            <!-- Answer Form -->
+            <form asp-page-handler="SubmitAnswer" method="post" id="answerForm">
+                <input type="hidden" asp-for="Data.TestSessionId"/>
+                <input type="hidden" asp-for="Data.CurrentFlashcardId"/>
+                <input type="hidden" name="startTime" id="startTime"
+                       value="@Model.Data.QuestionStartTime.ToString("o")"/>
+
+                <div class="row g-3">
+                    @for (int i = 0; i < Model.Data.Answers.Count; i++)
+                    {
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input answer-radio"
+                                       type="radio"
+                                       name="SelectedAnswerId"
+                                       value="@Model.Data.Answers[i].Id"
+                                       id="answer@(i)"
+                                       required>
+                                <label class="form-check-label answer-label w-100 p-3 border rounded"
+                                       for="answer@(i)">
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-primary me-3">@((char)('A' + i))</span>
+                                        <span class="flex-grow-1">@Html.Raw(Model.Data.Answers[i].Text)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Validation -->
+                <div asp-validation-summary="ModelOnly" class="text-danger mt-3"></div>
+            </form>
+        </div>
+
+        <!-- Card Footer with Controls -->
+        <div class="card-footer bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-12 text-center">
+                    @if (Model.Data.CurrentFlashcard < Model.Data.TotalFlashcards)
+                    {
+                        <button type="submit" form="answerForm" class="btn btn-primary" id="confirmBtn">
+                            Confirm Answer
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-arrow-right ms-2" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                      d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.     0 0 1 1 8"/>
+                            </svg>
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="submit" form="answerForm" class="btn btn-success" id="finishBtn">
+                            Finish Test
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-check2 ms-2" viewBox="0 0 16 16">
+                                <path
+                                    d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+                            </svg>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exit Confirmation Modal -->
+<div class="modal fade" id="exitModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Exit Test Session</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to exit this test session?</p>
+                <p class="text-muted">
+                    <small>Your progress will be saved, but you'll need to restart from the beginning.</small>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Continue Test</button>
+                
+                <!-- Separate form for exit -->
+                <form asp-page-handler="ExitTest" method="post" style="display: inline;">
+                    <input type="hidden" asp-for="Data.TestSessionId" />
+                    <button type="submit" class="btn btn-danger">
+                        Exit Test
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        // Enable submit button when answer is selected
+        document.addEventListener('DOMContentLoaded', function () {
+
+            //Timer functionality - continue from server time
+            let initialElapsed = @Model.Data.QuestionStartTime;
+            
+
+            function updateTimer() {
+                const now = new Date();
+                const sessionElapsed = initialElapsed + Math.floor((now - new Date()) / 1000);
+                const minutes = Math.floor(sessionElapsed / 60);
+                const seconds = sessionElapsed % 60;
+                document.getElementById('timer').textContent =
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+
+            // Update timer every second
+            setInterval(updateTimer, 1000);
+
+            // Update the start time when question loads
+            document.getElementById('startTime').value = new Date().toISOString();
+        });
+    </script>
+}
