@@ -10,7 +10,7 @@ public sealed class BulkImportViewModel
     public required string DeckTitle { get; set; }
 
     public string DeckId { get; set; }
-    
+
     [Display(Name = "2. Select CSV File:")]
     public IFormFile? CsvFile { get; set; }
 

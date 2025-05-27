@@ -20,7 +20,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
         public string? IncorrectThree { get; set; }
         public string? IncorrectFour { get; set; }
 
-        public bool IsDuplicated { get; set; } 
+        public bool IsDuplicated { get; set; }
     }
 
     public class BulkImportModel : PageModel
@@ -35,7 +35,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
 
         [BindProperty]
         public BulkImportViewModel Input { get; set; } = new()
-            { DeckId = string.Empty, DeckTitle = string.Empty, CsvFile = null, ValidationErrors = [] };
+        { DeckId = string.Empty, DeckTitle = string.Empty, CsvFile = null, ValidationErrors = [] };
 
         public BulkImportModel(
             ILogger<BulkImportModel> logger,
@@ -59,7 +59,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             IsDataLoaded = false;
             StatusMessage = string.Empty;
             HttpContext.Session.SetString("CsvImportData", JsonSerializer.Serialize(new List<FlashcardDto>()));
-            
+
             return Page();
         }
 
@@ -103,20 +103,20 @@ namespace eKIBRA.Web.Pages.FlashcardPage
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
-            
+
             //Retrieve CsvData if it was persisted (e.g., from Session)
             var serializedData = HttpContext.Session.GetString("CsvImportData");
             if (!string.IsNullOrEmpty(serializedData))
             {
                 Input.Flashcards = JsonSerializer.Deserialize<List<FlashcardDto>>(serializedData) ?? new List<FlashcardDto>();
             }
-            
+
             if (Input.Flashcards == null || !Input.Flashcards.Any())
             {
                 StatusMessage = "No data to save. Please import a CSV file first.";
                 return Page();
             }
-            
+
             // User retrieve - validation
             var user = await _user.GetUserAsync(User);
             if (user is null)
@@ -124,7 +124,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var newFlashcards = new List<Flashcard>();
 
             foreach (var flashcard in Input.Flashcards)
@@ -133,12 +133,12 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 {
                     continue;
                 }
-                
+
                 var incorrects = new[]
                         { flashcard.IncorrectOne, flashcard.IncorrectTwo, flashcard.IncorrectThree, flashcard.IncorrectFour }
                     .Where(q => !string.IsNullOrWhiteSpace(q))
                     .ToList();
-                
+
                 var data = new Flashcard
                 {
                     Id = Guid.NewGuid()
@@ -149,12 +149,12 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                     Answer = flashcard.Answer!,
                     Incorrects = incorrects,
                 };
-                
+
                 newFlashcards.Add(data);
             }
-            
+
             await _context.Flashcards.AddRangeAsync(newFlashcards);
-            
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -202,7 +202,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 StatusMessage = MessageType.Warning + "File size exceeds the 10MB limit.";
                 return Page();
             }
-            
+
             // User retrieve - validation
             var user = await _user.GetUserAsync(User);
             if (user is null)
@@ -210,10 +210,10 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 StatusMessage = MessageType.Error + "Your account was not found. Go to [Register] page.";
                 return Page();
             }
-            
+
             var userFlashcards = await _context.Flashcards.AsNoTracking().Where(q =>
                     q.UserId == user.Id && q.DeckId == Input.DeckId)
-                .Select(s => new FlashcardDto { Question = s.Question, Answer = s.Answer } )
+                .Select(s => new FlashcardDto { Question = s.Question, Answer = s.Answer })
                 .ToListAsync();
 
             Input.Flashcards = new List<FlashcardDto>();
@@ -234,10 +234,10 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                     string[] actualHeaders = headerLine.Split(',').Select(h => h.Trim().Replace("\"", "")).ToArray();
                     if (!expectedHeaders.SequenceEqual(actualHeaders, StringComparer.OrdinalIgnoreCase))
                     {
-                       StatusMessage =  MessageType.Error + "CSV header does not match the expected format.";
-                       return Page();
+                        StatusMessage = MessageType.Error + "CSV header does not match the expected format.";
+                        return Page();
                     }
-                    
+
                     string? line;
                     int lineNumber = 1;
                     while ((line = await reader.ReadLineAsync()) != null)
@@ -252,11 +252,11 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                             StatusMessage = $"Warning: Skipping line {lineNumber} due to insufficient columns.";
                             continue;
                         }
-                        
+
                         //Alert if the question already exists in the user's flashcards
                         var question = values.ElementAtOrDefault(0)?.Trim();
                         var isDuplicated = userFlashcards.Any(f => f.Question == question);
-                        
+
                         var flashcard = new FlashcardDto
                         {
                             Question = values.ElementAtOrDefault(0)?.Trim(),
@@ -267,13 +267,13 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                             IncorrectFour = values.ElementAtOrDefault(5)?.Trim(),
                             IsDuplicated = isDuplicated
                         };
-                        
+
                         // Skip if question is duplicated on the csv.
-                       var csvDuplication =  Input.Flashcards.Any(f => f.Question == flashcard.Question);
-                       if (!csvDuplication)
-                       {
-                           Input.Flashcards.Add(flashcard);
-                       }
+                        var csvDuplication = Input.Flashcards.Any(f => f.Question == flashcard.Question);
+                        if (!csvDuplication)
+                        {
+                            Input.Flashcards.Add(flashcard);
+                        }
                     }
                 }
 
@@ -282,23 +282,23 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                     IsDataLoaded = true;
                     HttpContext.Session.SetString("CsvImportData",
                         JsonSerializer.Serialize(Input.Flashcards));
-                    
+
                     StatusMessage = MessageType.Success
                          + $"Successfully parsed {Input.Flashcards.Count} records from the CSV. Review and click 'Save'.";
                 }
                 else
                 {
-                    StatusMessage = MessageType.Warning+ "No data found in the CSV file or all lines were skipped.";
+                    StatusMessage = MessageType.Warning + "No data found in the CSV file or all lines were skipped.";
                 }
             }
             catch (Exception ex)
             {
-                StatusMessage = MessageType.Error+ $"Error processing CSV file: {ex.Message}";
+                StatusMessage = MessageType.Error + $"Error processing CSV file: {ex.Message}";
             }
 
             return Page();
         }
-        
+
         private string[] ParseCsvLine(string line)
         {
             var fields = new List<string>();
@@ -312,7 +312,7 @@ namespace eKIBRA.Web.Pages.FlashcardPage
                 if (c == '"')
                 {
                     // Handle double quotes within a quoted field (e.g., "field with ""quotes"" inside")
-                    if (inQuotes && i + 1 < line.Length && line[i+1] == '"')
+                    if (inQuotes && i + 1 < line.Length && line[i + 1] == '"')
                     {
                         currentField.Append('"');
                         i++; // Skip next quote

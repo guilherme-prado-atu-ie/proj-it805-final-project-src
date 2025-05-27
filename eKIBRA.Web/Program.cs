@@ -25,7 +25,7 @@ public class Program
         builder.Services.AddScoped<ISpacedRepetitionImplementation, SpacedRepetitionEKibraV1>();
 
         builder.Services.AddRazorPages();
-        
+
         builder.Services.AddDistributedMemoryCache();
         builder.Services.AddSession(options =>
         {
@@ -51,13 +51,13 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseRouting();
-        
+
         app.UseSession();
-        
+
         app.UseAuthorization();
 
         app.MapStaticAssets();
-        
+
         app.MapRazorPages()
            .WithStaticAssets();
 
