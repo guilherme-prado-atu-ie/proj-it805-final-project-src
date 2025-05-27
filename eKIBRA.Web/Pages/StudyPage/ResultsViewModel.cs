@@ -15,22 +15,47 @@ public sealed class StudySessionStatistics
 {
     public string SessionId { get; set; }
     public int TotalQuestions { get; set; }
-    public int CorrectAnswers { get; set; }
-    public int IncorrectAnswers { get; set; }
-    public double AccuracyPercentage { get; set; }
+    
+    public int SumOfReveals { get; set; }
+    public int RevealsAcrossSessions { get; set; }
+    public int SumOfRemember { get; set; }
+    public int RemembersAcrossSessions { get; set; }
+    public int SumOfForgot { get; set; }
+    public int ForgotAcrossSessions { get; set; }
+  
+    public double MemoryRetention { get; set; }
+    
+    public double MemoryRetentionAcrossSessions { get; set; }
+    
+    public double AvgRepetitionInterval { get; set; }
+    public double AvgNextRepetitionInterval { get; set; }
     public double AverageTimePerQuestion { get; set; }
     public int TotalTimeInSeconds { get; set; }
-
-    public string FormattedTotalTime => TimeSpan.FromSeconds(TotalTimeInSeconds).ToString(@"mm\:ss");
-    public string FormattedAverageTime => TimeSpan.FromSeconds(AverageTimePerQuestion).ToString(@"mm\:ss");
 }
 
 public class QuestionResultViewModel
 {
-    public string QuestionText { get; set; }
-    public string SelectedAnswer { get; set; }
-    public string CorrectAnswer { get; set; }
-    public bool IsCorrect { get; set; }
+    public string QuestionText { get; set; } = string.Empty;
+    public string RememberForgetSummary { get; set; } = string.Empty;
+    public string Answer { get; set; } = string.Empty;
+    
+    public int Forgot { get; set; }
+    
+    public int Reveal { get; set; }
+    
+    public DifficultyLevel Level { get; set; }
+    
+    public int Remember { get; set; }
+    
+    public int RemembersAcrossSessions { get; set; }
+    public int ForgotAcrossSessions { get; set; }
+    public int RevealsAcrossSessions { get; set; }
+    
+    public double RepetitionInterval { get; set; }
+    public double NextRepetitionInterval { get; set; }
+    
+    
+    public bool HasRememberAtFirst { get; set; }
     public int TimeInSeconds { get; set; }
     public string FormattedTime => TimeSpan.FromSeconds(TimeInSeconds).ToString(@"mm\:ss");
 }

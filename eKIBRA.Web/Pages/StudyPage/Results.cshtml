@@ -7,7 +7,7 @@
 
 <partial name="_ValidationAuthenticationCheckPartial"/>
 
-<h4>Test Results</h4>
+<h4>Study Results</h4>
 
 <partial name="_ValidationStatusMessagePartial" for="StatusMessage"/>
 
@@ -33,14 +33,7 @@
                     @if (Model.Data.Status == StudySessionStatus.Completed)
                     {
                         <span class="badge bg-success fs-6">
-                        <i class="fas fa-check-circle me-1"></i>Completed
-                    </span>
-                    }
-                    else if (Model.Data.Status == StudySessionStatus.InProgress)
-                    {
-                        <span class="badge bg-warning fs-6">
-                        <i class="fas fa-exclamation-triangle me-1"></i>Partial
-                    </span>
+                        <i class="fas fa-check-circle me-1"></i>Completed</span>
                     }
                 </div>
             </div>
@@ -49,41 +42,94 @@
     <div class="card mb-4 shadow-sm border-1 bg-light">
         <div class="card-body text-center p-4">
             <div class="row align-items-center">
-                <div class="col-md-3">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-2">
                     <div class="score-circle mx-auto mb-3 mb-md-0">
                         <div class="score-text">
-                            <div class="score-percentage"><h3>@Model.Stats.AccuracyPercentage%</h3></div>
-                            <small class="text-muted"><h6>Score</h6></small>
+                            <div class="score-percentage">
+                                <h3>@Model.Stats.MemoryRetention%</h3></div>
+                            <small class="text-muted"><h6>Retention</h6></small>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-9">
-                    <div class="row text-center">
-                        <div class="col-6 col-md-3">
-                            <div class="stat-item">
-                                <div class="stat-number text-success"><h3>@Model.Stats.CorrectAnswers</h3></div>
-                                <span class="text-muted"><h6>Correct</h6></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="stat-item">
-                                <div class="stat-number text-danger"><h3>@Model.Stats.IncorrectAnswers</h3></div>
-                                <span class="text-muted"><h6>Incorrect</h6></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="stat-item">
-                                <div class="stat-number"><h3>@Model.Stats.FormattedTotalTime</h3></div>
-                                <span class="text-muted"><h6>Total Time</h6></span>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                            <div class="stat-item">
-                                <div class="stat-number"><h3>@Model.Stats.FormattedAverageTime</h3></div>
-                                <span class="text-muted"><h6>Time/Question</h6></span>
-                            </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-primary">
+                            <h3>@Model.Stats.SumOfReveals</h3></div>
+                        <span class="text-muted"><h6>Reveals</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-success">
+                            <h3>@Model.Stats.SumOfRemember</h3></div>
+                        <span class="text-muted"><h6>Remembers</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-danger">
+                            <h3>@Model.Stats.SumOfForgot</h3></div>
+                        <span class="text-muted"><h6>Forgot</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-warning">
+                            <h3>@Model.Stats.AvgRepetitionInterval</h3></div>
+                        <span class="text-muted"><h6>Session SRM (days)</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col col-md-12">
+                    <hr/>
+                </div>
+            </div>
+            <div class="row align-items-center">
+                <div class="col-md-1">
+                </div>
+                <div class="col-md-2">
+                    <div class="score-circle mx-auto mb-3 mb-md-0">
+                        <div class="score-text">
+                            <div class="score-percentage">
+                                <h3>@Model.Stats.MemoryRetentionAcrossSessions%</h3></div>
+                            <small class="text-muted"><h6>Retention<br>(in Previous Sessions)</h6></small>
                         </div>
                     </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-primary">
+                            <h3>@Model.Stats.RevealsAcrossSessions</h3></div>
+                        <span class="text-muted"><h6>Total of Reveals<br>(in Previous Sessions)</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-success">
+                            <h3>@Model.Stats.RemembersAcrossSessions</h3></div>
+                        <span class="text-muted"><h6>Total of Remembers<br>(in Previous Sessions)</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-danger">
+                            <h3>@Model.Stats.ForgotAcrossSessions</h3></div>
+                        <span class="text-muted"><h6>Total of Forgot<br>(in Previous Sessions)</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stat-item">
+                        <div class="stat-number text-warning">
+                            <h3>@Model.Stats.AvgNextRepetitionInterval</h3></div>
+                        <span class="text-muted"><h6>Next SRM (days)</h6></span>
+                    </div>
+                </div>
+                <div class="col-md-1">
                 </div>
             </div>
         </div>
@@ -99,46 +145,64 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="overflow-y: auto;">
-                        <table class="table table-striped table-hover table-sm">
+                        <table class="table table-striped table-bordered table-hover table-sm">
                             <thead class="table-light sticky-top">
                             <tr>
-                                <th>#</th>
-                                <th>Question</th>
-                                <th>Your Answer</th>
-                                <th>Correct Answer</th>
-                                <th>Time</th>
-                                <th>Result</th>
+                                <th class="text-center align-middle">#</th>
+                                <th class="text-start align-middle">Question</th>
+                                <th class="text-center align-middle">Level</th>
+                                <th class="text-center align-middle">Reveals</th>
+                                <th class="text-center align-middle">Forgot</th>
+                                <th class="text-center align-middle">Reveals<br>(Previous)</th>
+                                <th class="text-center align-middle">Remembers<br>(Previous)</th>
+                                <th class="text-center align-middle">Forgot<br>(Previous)</th>
+                                <th class="text-center align-middle">SRM</th>
+                                <th class="text-center align-middle">Next SRM</th>
+                                <th class="text-center align-middle">Result</th>
                             </tr>
                             </thead>
                             <tbody>
-                            @for (int i = 0; i < Model.QuestionResults.Count; i++)
+                            @for (var i = 0; i < Model.QuestionResults.Count; i++)
                             {
                                 var result = Model.QuestionResults[i];
                                 <tr>
-                                    <td><strong>@(i + 1)</strong></td>
-                                    <td>
+                                    <td class="text-center align-middle"><strong>@(i + 1)</strong></td>
+                                    <td class="text-start align-middle">
                                         <span class="question-preview" title="@result.QuestionText">
                                             @(result.QuestionText.Length > 50 ? result.QuestionText.Substring(0, 50) + "..." : result.QuestionText)
                                         </span>
                                     </td>
-                                    <td>
-                                        <span class="@(result.IsCorrect ? "text-success" : "text-danger")">
-                                            @result.SelectedAnswer
+                                    @*<td class="text-start align-middle">
+                                        <span class="@(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                            @result.RememberForgetSummary
                                         </span>
+                                    </td>*@
+                                    <td class="text-center align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.Level.ToString()
                                     </td>
-                                    <td>
-                                        @if (!result.IsCorrect)
-                                        {
-                                            <span class="text-success">@result.CorrectAnswer</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-muted">-</span>
-                                        }
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.Reveal
                                     </td>
-                                    <td>@result.FormattedTime</td>
-                                    <td>
-                                        @if (result.IsCorrect)
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.Forgot
+                                    </td>
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.RevealsAcrossSessions
+                                    </td>
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.RemembersAcrossSessions
+                                    </td>
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.ForgotAcrossSessions
+                                    </td>
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.RepetitionInterval
+                                    </td>
+                                    <td class="text-end align-middle @(result.HasRememberAtFirst ? "text-success" : "text-danger")">
+                                        @result.NextRepetitionInterval
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        @if (result.HasRememberAtFirst)
                                         {
                                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-check-lg text-success" viewBox="0 0 22 22">
                                                 <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 
 namespace eKIBRA.Web.Pages.StudyPage
 {
@@ -67,11 +68,11 @@ namespace eKIBRA.Web.Pages.StudyPage
                 if (session is null)
                 {
                     StatusMessage = MessageType.Warning
-                                    + "Test session not found.";
+                                    + "Study session not found.";
+                    return Page();
                 }
 
-                var allowedStatus = new[] { StudySessionStatus.Completed };
-                if (!allowedStatus.Contains(session.Status))
+                if(session.Status != StudySessionStatus.Completed)
                 {
                     return RedirectToPage("./Index");
                 }
@@ -106,7 +107,8 @@ namespace eKIBRA.Web.Pages.StudyPage
             {
                 // Get all responses for this session
                 var cardProgress = await _context.FlashcardsProgress
-                    .Where(r => r.StudySessionId == session.Id && !r.IsDeleted)
+                    .Where(r => 
+                        r.StudySessionId == session.Id)
                     .ToListAsync();
 
                 var totalTime = 0;
@@ -115,32 +117,51 @@ namespace eKIBRA.Web.Pages.StudyPage
                     totalTime = (int)(session.Created - session.Modified.Value).TotalSeconds;
                 }
 
-                var correctCount = cardProgress.Count(r => r.Remembers > 0);
-                var incorrectCount = cardProgress.Count(r => r.Forgets > 0);
+                var sumOfReveals = cardProgress.Sum(r => r.Reveals);
+                var sumOfRemember = cardProgress.Sum(r => r.Remembers);
+                var sumOfForgot = cardProgress.Sum(r => r.Forgets);
                 
-                var accuracy = cardProgress.Count > 0 ?
-                    Math.Round((double)correctCount / cardProgress.Count * 100, 1) : 0;
-
-                /*var avgTime = cardProgress.Count > 0 ?
-                    Math.Round(
-                        cardProgress.Average(r => (
-                        (r.RevealAt.HasValue 
-                            ? r.RevealAt.Value 
-                            : r.Created) 
-                        - (r.RevealAt.HasValue ? r.RevealAt.Value : r.Created)
-                        ).TotalSeconds(), 1) : 0;*/
+                var memoryRetentionSimplify = sumOfForgot > 0 ?
+                    Math.Round(cardProgress.Count / (double)sumOfReveals * 100, 1) : 100;
+                /*
+                 * as a question can be remembered only once and a session will be completed only if
+                 * all questions were remembered, we can calculate the memory retention across sessions
+                 */
+                var sumOfRememberAcrossSessions = cardProgress.Sum(r => r.RemembersAcrossSessions);
+                var sumOfRevealsAcrossSessions = cardProgress.Sum(r => r.RevealsAcrossSessions);
                 
-                /*var avgTime = cardProgress.Count > 0 ?
-                    Math.Round(cardProgress.Average(r => (r.RememberAt??r.Forgets).Value.Ticks), 1) : 0;*/
-                var avgTime = 1;
+                var memoryRetentionAcrossSessionsSimplify = sumOfForgot > 0 ?
+                    Math.Round(sumOfRememberAcrossSessions / (double)sumOfRevealsAcrossSessions * 100, 1) : 100;
+                
+                var avgTime = Math.Round(
+                    cardProgress.Average(r=> r.RevealAt?.Ticks - r.Modified?.Ticks) ?? 1, 1);
+                
+                var avgSpacedRepetitionSession = Math.Round(cardProgress
+                    .Average(r=>r.SpacedRepetitionInterval), 1);
+                
+                var avgSpacedRepetitionNextSession = Math.Round(cardProgress
+                    .Average(r=>r.NextSpacedRepetitionInterval), 1);
 
                 return new StudySessionStatistics
                 {
                     SessionId = session.Id,
                     TotalQuestions = cardProgress.Count,
-                    CorrectAnswers = correctCount,
-                    IncorrectAnswers = incorrectCount,
-                    AccuracyPercentage = accuracy,
+                    
+                    SumOfReveals = sumOfReveals,
+                    RevealsAcrossSessions = sumOfRevealsAcrossSessions,
+                    
+                    SumOfRemember = sumOfRemember,
+                    RemembersAcrossSessions = sumOfRememberAcrossSessions,
+                    
+                    SumOfForgot = sumOfForgot,
+                    ForgotAcrossSessions = cardProgress.Sum(r => r.ForgetsAcrossSessions),
+                    
+                    MemoryRetention = memoryRetentionSimplify,
+                    MemoryRetentionAcrossSessions = memoryRetentionAcrossSessionsSimplify,
+                    
+                    AvgRepetitionInterval = avgSpacedRepetitionSession,
+                    AvgNextRepetitionInterval = avgSpacedRepetitionNextSession,
+                    
                     AverageTimePerQuestion = avgTime,
                     TotalTimeInSeconds = totalTime
                 };
@@ -170,17 +191,31 @@ namespace eKIBRA.Web.Pages.StudyPage
 
                 foreach (var response in responseData)
                 {
-                    if (response.LinkedFlashcard == null) continue;
-
                     // Determine what the user selected
-                    var selectedAnswer = await GetSelectedAnswerTextAsync(response);
+                    var rememberForgetSummary =  GetRememberForgetSummary(response);
 
                     results.Add(new QuestionResultViewModel
                     {
                         QuestionText = response.LinkedFlashcard.Question,
-                        SelectedAnswer = selectedAnswer,
-                        CorrectAnswer = response.LinkedFlashcard.Answer,
-                        IsCorrect = true,
+                        Answer = response.LinkedFlashcard.Answer,
+                        
+                        Level = response.Level,
+                        
+                        Reveal = response.Reveals,
+                        RevealsAcrossSessions = response.RevealsAcrossSessions,
+                        
+                        Remember = response.Remembers,
+                        RemembersAcrossSessions = response.RemembersAcrossSessions,
+                        
+                        Forgot = response.Forgets,
+                        ForgotAcrossSessions = response.ForgetsAcrossSessions,
+                        
+                        RepetitionInterval = response.SpacedRepetitionInterval,
+                        NextRepetitionInterval = response.NextSpacedRepetitionInterval,
+                        
+                        RememberForgetSummary = rememberForgetSummary,
+                        HasRememberAtFirst = response.Forgets == 0,
+                        
                         TimeInSeconds = 1
                     });
                 }
@@ -193,22 +228,14 @@ namespace eKIBRA.Web.Pages.StudyPage
                 throw;
             }
         }
-        private async Task<string> GetSelectedAnswerTextAsync(FlashcardProgress response)
+        private string GetRememberForgetSummary(FlashcardProgress response)
         {
             try
             {
-                // If the response was correct, return the correct answer
-                if (response.Remembers > 0)
-                {
-                    return response.LinkedFlashcard.Answer;
-                }
-
-                if (response.Forgets > 0)
-                {
-                    return "Forgot";
-                }
-
-                return "Incorrect";
+                var forget = response.Forgets > 1 ? $"{response.Forgets} times" : "once";
+                return response.Reveals - response.Remembers == 0 
+                    ? "Remember at first!" 
+                    : $"Rememberd after {response.Reveals} Reveals.";
             }
             catch (Exception ex)
             {

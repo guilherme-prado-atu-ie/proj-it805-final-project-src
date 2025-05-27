@@ -68,6 +68,7 @@ namespace eKIBRA.Web.Pages.TestPage
                 {
                     StatusMessage = MessageType.Warning
                                     + "Test session not found.";
+                    return Page();
                 }
 
                 var allowedStatus = new[] { TestSessionStatus.Completed, TestSessionStatus.Cancelled };
