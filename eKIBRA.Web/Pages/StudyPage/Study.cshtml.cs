@@ -32,6 +32,7 @@ public class StudyModel : PageModel
         DeckTitle = Empty,
         Question = Empty,
         Answer = Empty,
+        Level = DifficultyLevel.Medium,
 
         ShowRevealButton = false,
         ShowAnwserText = false,
@@ -185,6 +186,7 @@ public class StudyModel : PageModel
 
                 ShowRevealButton = true,
                 ShowAnwserText = false,
+                Level = DifficultyLevel.Medium,
 
                 Status = StudyViewModelStatus.Open,
                 Command = StudyViewModelCommand.Get,
@@ -211,6 +213,7 @@ public class StudyModel : PageModel
 
             Question = item.LinkedFlashcard.Question,
             Answer = item.LinkedFlashcard.Answer,
+            Level = item.Level,
 
             ShowRevealButton = showReveal,
             ShowAnwserText = !showReveal,
@@ -288,6 +291,7 @@ public class StudyModel : PageModel
 
                 Question = item.LinkedFlashcard.Question,
                 Answer = item.LinkedFlashcard.Answer,
+                Level = Input.Level,
 
                 Status = questionProgress > totalOfQuestions
                     ? StudyViewModelStatus.Completed
@@ -318,6 +322,7 @@ public class StudyModel : PageModel
         var remembersAt = DateTime.UtcNow;
         var remembers = item.Remembers + 1;
         var remembersAcrossSessions = item.RemembersAcrossSessions + 1;
+        var level = Input.Level;
         var modifiedUserId = userId;
         var modified = remembersAt;
         var isStudyCompleted = totalOfQuestions == questionProgress;
@@ -336,6 +341,7 @@ public class StudyModel : PageModel
                     .SetProperty(p => p.Remembers, remembers)
                     .SetProperty(p => p.RememberAt, remembersAt)
                     .SetProperty(p => p.RemembersAcrossSessions, remembersAcrossSessions)
+                    .SetProperty(p => p.Level, level)
                     .SetProperty(p => p.Modified, modified)
                     .SetProperty(p => p.ModifierUserId, modifiedUserId)
                     .SetProperty(p => p.Version, version));
@@ -375,6 +381,7 @@ public class StudyModel : PageModel
 
                     Question = item.LinkedFlashcard.Question,
                     Answer = item.LinkedFlashcard.Answer,
+                    Level = Input.Level,
 
                     Status = questionProgress > totalOfQuestions
                         ? StudyViewModelStatus.Completed
@@ -415,6 +422,7 @@ public class StudyModel : PageModel
         var forgetAt = DateTime.UtcNow;
         var forgets = item.Forgets + 1;
         var forgetsAcrossSessions = item.ForgetsAcrossSessions + 1;
+        var level = Input.Level;
         var modifiedUserId = userId;
         var modified = forgetAt;
         var isStudyCompleted = totalOfQuestions == questionProgress;
@@ -437,6 +445,7 @@ public class StudyModel : PageModel
                     .SetProperty(p => p.Forgets, forgets)
                     .SetProperty(p => p.ForgetAt, forgetAt)
                     .SetProperty(p => p.ForgetsAcrossSessions, forgetsAcrossSessions)
+                    .SetProperty(p => p.Level, level)
                     .SetProperty(p => p.Modified, modified)
                     .SetProperty(p => p.ModifierUserId, modifiedUserId)
                     .SetProperty(p => p.Version, version));
@@ -481,6 +490,7 @@ public class StudyModel : PageModel
 
                     Question = item.LinkedFlashcard.Question,
                     Answer = item.LinkedFlashcard.Answer,
+                    Level = Input.Level,
 
                     Status = isStudyCompleted
                         ? StudyViewModelStatus.Completed
@@ -511,6 +521,7 @@ public class StudyModel : PageModel
     private async Task<Navigation> GetFlashcardProgress(string userId, string studySessionId, string? flashcardProgressId = null)
     {
         //_srm.CreateListOfFlashcardProgress();
+
         var totalOfQuestions = await _context.FlashcardsProgress
             .AsNoTracking()
             .Where(q =>

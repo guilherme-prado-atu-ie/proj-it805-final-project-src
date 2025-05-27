@@ -6,9 +6,15 @@
 }
 <partial name="_ValidationAuthenticationCheckPartial" xmlns="http://www.w3.org/1999/html"/>
 
-@{ if (Model.Input is null || string.IsNullOrWhiteSpace(Model.Input.StudySessionId)) return; }
-
 <h4>Studying Session</h4>
+
+@{ if (Model.Input is null || string.IsNullOrWhiteSpace(Model.Input.StudySessionId)) return; }
+<p>
+    <a asp-page="./Create">Create New</a> |
+    <a asp-page="./Statics" asp-route-id="@Model.Input.StudySessionId">Statics</a> |
+    <a asp-page="./Delete" asp-route-id="@Model.Input.StudySessionId">Delete</a> |
+    <a asp-page="./Index">Back to List</a>
+</p>
 
 <partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
 
@@ -40,10 +46,10 @@
                             <h5 class="my-0 font-weight-normal">
                                 Question @Model.Input.QuestionsProgress of @Model.Input.TotalOfQuestions
                             </h5>
-
                         </div>
-                        
                         <div class="card-body">
+                            <br/>
+                            <br/>
                             @if (Model.Input.NoQuestionLeft)
                             {
                                 <span>No Questions Left</span>
@@ -53,31 +59,54 @@
                                 @Model.Input.Question
                             }
                             <hr/>
+                            <br/>
+                            <br/>
                             @if (!Model.Input.ShowAnwserText)
                             {
-                                <span>To Reveal</span>
+                                <span>. . .</span>
                             }
                             @if (Model.Input.ShowAnwserText)
                             {
                                 @Model.Input.Answer
                             }
-                        </div>
-                        
-                        <div class="card-footer">
-                            @if (Model.Input.ShowRevealButton)
-                            {
-                                <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Reveal"
-                                       class="btn btn-lg btn-block btn-outline-primary @noQuestionLeft" />
-                            }
-                            @if (!Model.Input.ShowRevealButton)
-                            {
-                                <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Remember"
-                                       class="btn btn-lg btn-block btn-outline-success @noQuestionLeft"/>
+                            <hr/>
+                            <br/>
+                            <div class="row">
+                                <div class="col">
+                                    @if (Model.Input.ShowRevealButton)
+                                    {
 
-                                <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Forgot"
-                                       class="btn btn-lg btn-block btn-outline-danger @noQuestionLeft"/>
-                            }
+                                        <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Reveal"
+                                               class="btn btn-lg btn-block btn-outline-primary @noQuestionLeft"/>
+
+                                    }
+                                    @if (!Model.Input.ShowRevealButton)
+                                    {
+                                        <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Remember"
+                                               class="btn btn-lg btn-block btn-outline-success @noQuestionLeft"/>
+
+                                        <input type="submit" asp-for="Input.Command" value="@StudyViewModelCommand.Forgot"
+                                               class="btn btn-lg btn-block btn-outline-danger @noQuestionLeft"/>
+
+                                        <br/>
+                                        <br/>
+
+                                        <select asp-for="@Model.Input.Level" class="btn btn-lg btn-block  @noQuestionLeft"
+                                                asp-items="Html.GetEnumSelectList<DifficultyLevel>()"
+                                                placeholder="Status">
+                                            <option value="">Select a value</option>
+                                        </select>
+                                        <br/>
+                                        <br/>
+                                        <span asp-validation-for="Input.Level" class="text-danger"></span>
+
+                                    }
+                                </div>
+                            </div>
                         </div>
+                        <div class="card-footer">
+            
+                        </div>     
                     </div>
                 </div>
             </div>
