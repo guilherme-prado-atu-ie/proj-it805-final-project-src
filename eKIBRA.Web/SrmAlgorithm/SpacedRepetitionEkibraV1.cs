@@ -72,7 +72,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
         var created = DateTime.UtcNow;
         var listOfNewFlashcardProgress = deck
             .Flashcards
-            .Select(item => 
+            .Select(item =>
                 new FlashcardProgress
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -100,7 +100,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
          */
         var lastStudyDeck = await _context.StudySessions
             .AsNoTracking()
-            .Include(i=> i.FlashcardsProgress)
+            .Include(i => i.FlashcardsProgress)
             .Where(q =>
                 q.UserId == input.UserId
                 && q.DeckId == input.DeckId
@@ -109,7 +109,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
             .Select(s => new { s.Id, s.Modified, s.FlashcardsProgress })
             .OrderByDescending(q => q.Modified)
             .FirstOrDefaultAsync();
-        
+
         if (lastStudyDeck is null)
         {
             _logger.LogWarning("Previous Study Session not found.");
@@ -120,7 +120,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
          * copy and evaluate the srm data from the last study session
          */
         foreach (var item in lastStudyDeck.FlashcardsProgress
-                     .Where(q=> q.Modified != null))
+                     .Where(q => q.Modified != null))
         {
             // deck can have new flashcards not studied before; those will have the SRM interval of (1 day)
             var newFlashcard = listOfNewFlashcardProgress
@@ -128,24 +128,24 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
 
             // set the default values for the new flashcards
             if (newFlashcard is null) continue;
-            
+
             newFlashcard.ForgetsAcrossSessions = item.ForgetsAcrossSessions;
             newFlashcard.RemembersAcrossSessions = item.RemembersAcrossSessions;
             newFlashcard.RevealsAcrossSessions = item.RevealsAcrossSessions;
-            
+
             newFlashcard.SpacedRepetitionInterval = item.SpacedRepetitionInterval;
             newFlashcard.NextSpacedRepetitionInterval = item.NextSpacedRepetitionInterval;
 
             /*
              * Check if the next interval is due, so it will be recalculated otherwise keep the existing interval.
              */
-            var srmIntervalNext = 
+            var srmIntervalNext =
                 item.NextSpacedRepetitionInterval > 0
                     ? item.NextSpacedRepetitionInterval
                     : 1;
-            if (DateTime.UtcNow.Date <= item.Modified?.AddDays(srmIntervalNext).Date) 
+            if (DateTime.UtcNow.Date <= item.Modified?.AddDays(srmIntervalNext).Date)
                 continue;
-            
+
             /*
              * Shift the SRM interval according to (A. C. Mace) - Double Intervals 
              * Shift the SRM interval according to (Leitner System) - Lower Intervals for difficulty levels. 
@@ -156,7 +156,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
              * Medium - normal interval (double)
              * Hard - lower interval (1)
              */
-                
+
             switch (item.Level)
             {
                 case DifficultyLevel.Easy:
@@ -175,7 +175,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
         // appy the new order by and recalculate the sequence based on the new SRM inputs.
 
 
@@ -183,13 +183,13 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
             .OrderByDescending(o => o.SpacedRepetitionInterval)
             .ThenBy(o => o.Level)
             .ThenBy(o => o.ForgetsAcrossSessions);
-        
+
         sequence = 0;
         foreach (var item in orderBySrmRule)
         {
             item.Sequence = ++sequence;
         }
-        
+
         return listOfNewFlashcardProgress;
     }
 

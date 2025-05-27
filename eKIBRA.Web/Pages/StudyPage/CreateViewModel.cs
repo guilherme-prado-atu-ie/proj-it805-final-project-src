@@ -10,7 +10,7 @@ public sealed class CreateViewModel
     [Display(Name = "Deck", Description = "Select a deck to link with a study session.")]
     public required string DeckTitle { get; set; }
 
-    
+
     [StringLength(500)]
     [Display(Name = "Description", Description = "A selected deck description.")]
     public string? Description { get; set; }
