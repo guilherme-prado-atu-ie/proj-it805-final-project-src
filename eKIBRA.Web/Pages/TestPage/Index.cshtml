@@ -31,8 +31,11 @@
                            placeholder="Description" name="searchDescription" value="@Model.Filter.DescriptionFilter"/>
                 </div>
                 <div class="col-md-3">
-                    <input asp-for="@Model.Filter.StatusFilter" class="form-control" autocomplete="off"
-                           placeholder="Status" name="searchStatus" value="@Model.Filter.StatusFilter"/>
+                    <select asp-for="@Model.Filter.StatusFilter" class="form-control"
+                            asp-items="Html.GetEnumSelectList<TestSessionStatus>()"
+                            placeholder="Status" name="searchStatus" >
+                        <option value="">Select a value</option>
+                    </select>
                 </div>
                 <div class="col">
                     <input type="submit" value="Filter" class="btn btn-primary"/>

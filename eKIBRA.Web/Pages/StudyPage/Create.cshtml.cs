@@ -78,7 +78,7 @@ namespace eKIBRA.Web.Pages.StudyPage
                     && q.Title.Contains(search)
                     && !inUse
                         .Any(s => s.DeckId == q.Id))
-                .Select(s => new { Title = s.Title, Description = s.Description, Display = s.Title, Value = s.Id })
+                .Select(s => new { Title = s.Title, Description = s.Description ?? "", Display = s.Title, Value = s.Id })
                 .OrderBy(o => o.Display)
                 .ToListAsync();
 

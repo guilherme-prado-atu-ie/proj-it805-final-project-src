@@ -520,8 +520,6 @@ public class StudyModel : PageModel
 
     private async Task<Navigation> GetFlashcardProgress(string userId, string studySessionId, string? flashcardProgressId = null)
     {
-        //_srm.CreateListOfFlashcardProgress();
-
         var totalOfQuestions = await _context.FlashcardsProgress
             .AsNoTracking()
             .Where(q =>
@@ -555,7 +553,6 @@ public class StudyModel : PageModel
             query = query.Where(q =>
                     q.Remembers == 0)
                 .OrderBy(q => q.Sequence);
-            //.ThenByDescending(q => q.Reveals);
         }
 
         var flashcardProgress = await query.FirstOrDefaultAsync();
