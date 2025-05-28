@@ -7,6 +7,7 @@ namespace eKIBRA.Web.SrmAlgorithm;
 public interface ISpacedRepetitionImplementation
 {
     Task<List<FlashcardProgress>> CreateListOfFlashcardProgress(StudySessionParam input);
+    Task<int> SequenceOnStudySession(FlashcardProgress flashcardProgress);
 }
 
 public class StudySessionParam
@@ -177,12 +178,10 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
         }
 
         // appy the new order by and recalculate the sequence based on the new SRM inputs.
-
-
         var orderBySrmRule = listOfNewFlashcardProgress
-            .OrderByDescending(o => o.SpacedRepetitionInterval)
-            .ThenBy(o => o.Level)
-            .ThenBy(o => o.ForgetsAcrossSessions);
+            .OrderBy(o => o.SpacedRepetitionInterval) // lower interval = higher priority
+            .ThenByDescending(o => o.Level) // higher level = higher priority
+            .ThenByDescending(o => o.ForgetsAcrossSessions); // higher forgets = higher priority
 
         sequence = 0;
         foreach (var item in orderBySrmRule)
@@ -193,8 +192,22 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
         return listOfNewFlashcardProgress;
     }
 
-    public virtual int GetNextInterval(FlashcardProgress flashcardProgress)
+    public virtual async Task<int> SequenceOnStudySession(FlashcardProgress flashcardProgress)
     {
-        return 0;
+        var lastPosition = await _context.FlashcardsProgress
+            .AsNoTracking()
+            .Where(q =>
+                q.StudySessionId == flashcardProgress.StudySessionId
+                && q.Id != flashcardProgress.Id)
+            .MaxAsync(s => s.Sequence);
+
+        if (lastPosition <= flashcardProgress.Sequence) return lastPosition;
+
+        /*
+         * in future work - implement smarter rules to determine the sequence during
+         * study sessions based on multiple factors.
+         */
+
+        return lastPosition + 1;
     }
 }

@@ -431,7 +431,8 @@ public class StudyModel : PageModel
             : StudySessionStatus.InProgress;
 
         // Moves to random position for next iteration
-        var sequence = Random.Shared.Next(1, totalOfQuestions);
+        // Random.Shared.Next(1, totalOfQuestions)
+        var sequence = await _srm.SequenceOnStudySession(item);
 
         try
         {
