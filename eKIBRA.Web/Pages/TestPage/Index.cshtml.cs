@@ -70,7 +70,7 @@ namespace eKIBRA.Web.Pages.TestPage
             Filter.CreatedSort = sortedBy == "created" ? "created_desc" : "created";
             Filter.ModifiedSort = sortedBy == "modified" ? "modified_desc" : "modified";
 
-            if (searchTitle?.Length > 0 || searchDescription?.Length > 0 || searchStatus?.Length > 0 )
+            if (searchTitle?.Length > 0 || searchDescription?.Length > 0 || searchStatus?.Length > 0)
             {
                 pageIndex = 1;
             }
@@ -98,7 +98,7 @@ namespace eKIBRA.Web.Pages.TestPage
             {
                 query = query.Where(q => q.Description != null && q.Description.Contains(searchDescription));
             }
-       
+
             if (Enum.TryParse<TestSessionStatus>(searchStatus, true, out var status))
             {
                 query = query.Where(q => q.Status == status);
@@ -120,7 +120,7 @@ namespace eKIBRA.Web.Pages.TestPage
 
                 "title_desc" => query.OrderByDescending(q => q.Title),
                 "title" => query.OrderBy(q => q.Title),
-                
+
                 _ => query.OrderByDescending(q => q.Created),
             };
 

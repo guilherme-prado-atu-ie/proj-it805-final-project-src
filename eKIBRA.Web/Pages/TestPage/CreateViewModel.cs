@@ -13,6 +13,6 @@ public sealed class CreateViewModel
     [StringLength(500)]
     [Display(Name = "Title", Description = "A unique deck title.")]
     public string Title { get; set; }
-    
+
     public string? Description { get; set; }
 }

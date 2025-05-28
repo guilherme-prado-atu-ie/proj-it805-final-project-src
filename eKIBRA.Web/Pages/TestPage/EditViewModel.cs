@@ -18,7 +18,7 @@ public sealed class EditViewModel
     [StringLength(700)]
     [Display(Name = "Title", Description = "Test session title.")]
     public string Title { get; set; }
-    
+
     public string? Description { get; set; }
 
     [Required]
