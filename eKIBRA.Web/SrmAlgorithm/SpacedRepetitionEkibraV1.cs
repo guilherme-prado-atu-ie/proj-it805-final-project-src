@@ -197,8 +197,7 @@ public class SpacedRepetitionEKibraV1 : ISpacedRepetitionImplementation
         var lastPosition = await _context.FlashcardsProgress
             .AsNoTracking()
             .Where(q =>
-                q.StudySessionId == flashcardProgress.StudySessionId
-                && q.Id != flashcardProgress.Id)
+                q.StudySessionId == flashcardProgress.StudySessionId)
             .MaxAsync(s => s.Sequence);
 
         if (lastPosition <= flashcardProgress.Sequence) return lastPosition;

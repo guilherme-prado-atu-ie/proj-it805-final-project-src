@@ -65,12 +65,12 @@ namespace eKIBRA.Web.Pages.TestPage
 
             Filter.SortedBy = sortedBy;
             Filter.TitleSort = sortedBy == "title" ? "title_desc" : "title";
-            Filter.DescriptionSort = sortedBy == "Description" ? "description_desc" : "Description";
-            Filter.StatusSort = sortedBy == "Status" ? "status_desc" : "Status";
-            Filter.CreatedSort = sortedBy == "Created" ? "created_desc" : "Created";
-            Filter.ModifiedSort = sortedBy == "Modified" ? "modified_desc" : "Modified";
+            Filter.DescriptionSort = sortedBy == "description" ? "description_desc" : "description";
+            Filter.StatusSort = sortedBy == "status" ? "status_desc" : "status";
+            Filter.CreatedSort = sortedBy == "created" ? "created_desc" : "created";
+            Filter.ModifiedSort = sortedBy == "modified" ? "modified_desc" : "modified";
 
-            if (searchTitle?.Length > 0 || searchDescription?.Length > 0)
+            if (searchTitle?.Length > 0 || searchDescription?.Length > 0 || searchStatus?.Length > 0 )
             {
                 pageIndex = 1;
             }
@@ -78,6 +78,7 @@ namespace eKIBRA.Web.Pages.TestPage
             {
                 searchTitle = titleFilter;
                 searchDescription = descriptionFilter;
+                searchStatus = statusFilter;
             }
 
             Filter.TitleFilter = searchTitle;
@@ -97,31 +98,29 @@ namespace eKIBRA.Web.Pages.TestPage
             {
                 query = query.Where(q => q.Description != null && q.Description.Contains(searchDescription));
             }
-
-            if (!string.IsNullOrEmpty(searchStatus))
+       
+            if (Enum.TryParse<TestSessionStatus>(searchStatus, true, out var status))
             {
-                if (Enum.TryParse<TestSessionStatus>(searchStatus, true, out var status))
-                {
-                    query = query.Where(q => q.Status == status);
-                }
+                query = query.Where(q => q.Status == status);
             }
 
             query = sortedBy switch
             {
-                "Created" => query.OrderBy(q => q.Created),
+                "created" => query.OrderBy(q => q.Created),
                 "created_desc" => query.OrderByDescending(q => q.Created),
 
-                "Modified" => query.OrderBy(q => q.Modified),
+                "modified" => query.OrderBy(q => q.Modified),
                 "modified_desc" => query.OrderByDescending(q => q.Modified),
 
-                "Description" => query.OrderBy(q => q.Description),
+                "description" => query.OrderBy(q => q.Description),
                 "description_desc" => query.OrderByDescending(q => q.Description),
 
-                "Status" => query.OrderBy(q => q.Status),
+                "status" => query.OrderBy(q => q.Status),
                 "status_desc" => query.OrderByDescending(q => q.Status),
 
                 "title_desc" => query.OrderByDescending(q => q.Title),
                 "title" => query.OrderBy(q => q.Title),
+                
                 _ => query.OrderByDescending(q => q.Created),
             };
 
