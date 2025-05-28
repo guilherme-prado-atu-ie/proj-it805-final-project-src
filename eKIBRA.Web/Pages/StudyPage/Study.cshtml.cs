@@ -431,7 +431,8 @@ public class StudyModel : PageModel
             : StudySessionStatus.InProgress;
 
         // Moves to random position for next iteration
-        var sequence = Random.Shared.Next(1, totalOfQuestions);
+        // Random.Shared.Next(1, totalOfQuestions)
+        var sequence = await _srm.SequenceOnStudySession(item);
 
         try
         {
@@ -520,8 +521,6 @@ public class StudyModel : PageModel
 
     private async Task<Navigation> GetFlashcardProgress(string userId, string studySessionId, string? flashcardProgressId = null)
     {
-        //_srm.CreateListOfFlashcardProgress();
-
         var totalOfQuestions = await _context.FlashcardsProgress
             .AsNoTracking()
             .Where(q =>
@@ -555,7 +554,6 @@ public class StudyModel : PageModel
             query = query.Where(q =>
                     q.Remembers == 0)
                 .OrderBy(q => q.Sequence);
-            //.ThenByDescending(q => q.Reveals);
         }
 
         var flashcardProgress = await query.FirstOrDefaultAsync();

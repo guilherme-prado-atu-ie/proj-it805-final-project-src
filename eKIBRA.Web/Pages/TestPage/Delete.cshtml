@@ -22,6 +22,7 @@
 <p>
     <a asp-page="./Create">Create New</a> |
     <a asp-page="./Edit" asp-route-id="@Model.Input.Id">Edit</a> |
+    <a asp-page="./Results" asp-route-id="@Model.Input.Id">Results</a> |
     <a asp-page="./Details" asp-route-id="@Model.Input.Id">Details</a> |
     <a asp-page="./Index">Back to List</a>
 </p>
@@ -75,7 +76,7 @@
     <form method="post">
         <input type="hidden" asp-for="Input.Id" />
         <h5>Are you sure you want to delete this? </h5>
-        <p>This action will remove the associated items (e.g. Study)</p>
+        <p>This action will remove the associated items (e.g. Test Results)</p>
         <input type="submit" value="Delete" class="btn btn-danger" />
     </form>
 </div>

@@ -7,7 +7,7 @@
 
 <partial name="_ValidationAuthenticationCheckPartial" />
 
-<h4>Flashcard Details</h4>
+<h4>Test Session Details</h4>
 
 <partial name="_ValidationStatusMessagePartial" for="StatusMessage" />
 
@@ -16,6 +16,7 @@
 <p>
     <a asp-page="./Create">Create New</a> |
     <a asp-page="./Edit" asp-route-id="@Model.Input.Id">Edit</a> |
+    <a asp-page="./Results" asp-route-id="@Model.Input.Id">Results</a> |
     <a asp-page="./Delete" asp-route-id="@Model.Input.Id">Delete</a> |
     <a asp-page="./Index">Back to List</a>
 </p>

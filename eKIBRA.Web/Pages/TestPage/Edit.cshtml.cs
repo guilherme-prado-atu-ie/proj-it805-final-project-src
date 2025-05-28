@@ -150,7 +150,7 @@ namespace eKIBRA.Web.Pages.TestPage
             if (data.Status == TestSessionStatus.InProgress)
             {
                 StatusMessage = MessageType.Warning
-                                + "\"Test session in progress. Please wait until the current session completes.";
+                                + "Test session in progress. Please wait until the current session completes.";
                 return Page();
             }
 

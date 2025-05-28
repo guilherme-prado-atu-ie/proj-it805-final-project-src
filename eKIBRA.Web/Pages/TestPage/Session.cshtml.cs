@@ -173,7 +173,7 @@ namespace eKIBRA.Web.Pages.TestPage
                 session.Modified = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                return RedirectToPage("/TestPage/Results", new { id = Data.TestSessionId });
+                return RedirectToPage("./Results", new { id = Data.TestSessionId });
             }
             catch (Exception ex)
             {
@@ -201,7 +201,7 @@ namespace eKIBRA.Web.Pages.TestPage
                 }
 
                 // Redirect to results
-                return RedirectToPage("/TestPage/Results", new { sessionId = Data.TestSessionId });
+                return RedirectToPage("./Results", new { sessionId = Data.TestSessionId });
             }
             catch (Exception ex)
             {
@@ -258,7 +258,7 @@ namespace eKIBRA.Web.Pages.TestPage
             if (currentFlashcard == null)
             {
                 // No more questions - redirect to results
-                Response.Redirect($"/TestPage/Results?id={session.Id}");
+                Response.Redirect($"./Results?id={session.Id}");
                 return;
             }
 

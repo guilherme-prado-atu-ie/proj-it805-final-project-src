@@ -15,14 +15,11 @@ public sealed class EditViewModel
     public required string DeckTitle { get; set; }
 
     [Required(AllowEmptyStrings = false)]
-    [StringLength(4000)]
+    [StringLength(700)]
     [Display(Name = "Title", Description = "Test session title.")]
     public string Title { get; set; }
 
-    [Required(AllowEmptyStrings = false)]
-    [StringLength(4000)]
-    [Display(Name = "Description", Description = "Test session description.")]
-    public string Description { get; set; }
+    public string? Description { get; set; }
 
     [Required]
     [EnumDataType(typeof(TestSessionStatus))]
