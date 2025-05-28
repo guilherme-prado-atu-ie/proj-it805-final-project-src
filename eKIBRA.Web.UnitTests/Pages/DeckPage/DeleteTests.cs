@@ -14,7 +14,6 @@ namespace eKIBRA.Web.UnitTests.Pages.DeckPage;
 
 public sealed class DeleteTests : IDisposable
 {
-    private readonly Mock<ILogger<DeleteModel>> _mockLogger;
     private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
     private readonly Mock<SignInManager<ApplicationUser>> _mockSignInManager;
     private readonly ApplicationDbContext _context;
@@ -30,16 +29,16 @@ public sealed class DeleteTests : IDisposable
         _context = new ApplicationDbContext(options);
 
         // Setup mocks
-        _mockLogger = new Mock<ILogger<DeleteModel>>();
+        var mockLogger = new Mock<ILogger<DeleteModel>>();
 
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
 
         _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             _mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-            null, null, null, null);
+            null!, null!, null!, null!);
 
         // Create a test user
         _testUser = new ApplicationUser
@@ -60,7 +59,7 @@ public sealed class DeleteTests : IDisposable
 
         // Create page model
         _pageModel = new DeleteModel(
-            _mockLogger.Object,
+            mockLogger.Object,
             _context,
             _mockUserManager.Object,
             _mockSignInManager.Object);
@@ -89,7 +88,7 @@ public sealed class DeleteTests : IDisposable
                 DeckId = "test-deck-id",
                 UserId = _testUser.Id,
                 Incorrects = [],
-                LinkedDeck = null,
+                LinkedDeck = null!,
                 IsDeleted = false
             },
             new()
@@ -100,7 +99,7 @@ public sealed class DeleteTests : IDisposable
                 DeckId = "test-deck-id",
                 UserId = _testUser.Id,
                 Incorrects = [],
-                LinkedDeck = null,
+                LinkedDeck = null!,
                 IsDeleted = false
             }
         ];
@@ -332,6 +331,7 @@ public sealed class DeleteTests : IDisposable
         // Verify all flashcards are soft deleted
         Assert.All(deletedFlashcards, flashcard =>
         {
+            if (flashcard == null) throw new ArgumentNullException(nameof(flashcard));
             Assert.True(flashcard?.IsDeleted);
             Assert.StartsWith("Deleted ", flashcard?.Question);
             Assert.Contains(flashcard!.Id, flashcard.Question);

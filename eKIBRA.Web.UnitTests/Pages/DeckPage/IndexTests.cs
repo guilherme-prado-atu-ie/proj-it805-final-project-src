@@ -14,10 +14,8 @@ namespace eKIBRA.Web.UnitTests.Pages.DeckPage;
 
 public sealed class IndexTests : IDisposable
 {
-    private readonly Mock<ILogger<IndexModel>> _mockLogger;
     private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
     private readonly Mock<SignInManager<ApplicationUser>> _mockSignInManager;
-    private readonly IConfiguration _configuration;
     private readonly ApplicationDbContext _context;
     private readonly IndexModel _pageModel;
     private readonly ApplicationUser _testUser;
@@ -33,19 +31,19 @@ public sealed class IndexTests : IDisposable
         _context = new ApplicationDbContext(options);
 
         // Setup mocks
-        _mockLogger = new Mock<ILogger<IndexModel>>();
+        var mockLogger = new Mock<ILogger<IndexModel>>();
 
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
 
         _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             _mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-            null, null, null, null);
+            null!, null!, null!, null!);
 
         // Create real configuration with test values
-        _configuration = new ConfigurationBuilder()
+        IConfiguration configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>
             {
                 { "PageSize", "5" } // Set page size for testing
@@ -71,11 +69,11 @@ public sealed class IndexTests : IDisposable
 
         // Create page model
         _pageModel = new IndexModel(
-            _mockLogger.Object,
+            mockLogger.Object,
             _context,
             _mockUserManager.Object,
             _mockSignInManager.Object,
-            _configuration);
+            configuration);
 
         // Setup PageContext
         var httpContext = new DefaultHttpContext();
@@ -169,7 +167,7 @@ public sealed class IndexTests : IDisposable
             .Returns(false);
 
         // Act
-        await _pageModel.OnGetAsync(null, null, null, null, null, null);
+        await _pageModel.OnGetAsync(null!, null!, null!, null, null, null);
 
         // Assert
         Assert.NotNull(_pageModel.Data.EntityList);
@@ -188,7 +186,7 @@ public sealed class IndexTests : IDisposable
             .ReturnsAsync(null as ApplicationUser);
 
         // Act
-        await _pageModel.OnGetAsync(null, null, null, null, null, null);
+        await _pageModel.OnGetAsync(null!, null!, null!, null, null, null);
 
         // Assert
         Assert.Contains("Your account was not found", _pageModel.StatusMessage);
@@ -207,7 +205,7 @@ public sealed class IndexTests : IDisposable
             .ReturnsAsync(_testUser);
 
         // Act
-        await _pageModel.OnGetAsync(null, null, null, null, null, null);
+        await _pageModel.OnGetAsync(null!, null!, null!, null, null, null);
 
         // Assert
         Assert.Equal(string.Empty, _pageModel.StatusMessage);
@@ -230,7 +228,7 @@ public sealed class IndexTests : IDisposable
             .ReturnsAsync(_testUser);
 
         // Act
-        await _pageModel.OnGetAsync(sortBy, null, null, null, null, null);
+        await _pageModel.OnGetAsync(sortBy, null!, null!, null, null, null);
 
         // Assert
         var actualTitles = _pageModel.Data.EntityList.Take(expectedOrder.Length).Select(d => d.Title).ToArray();

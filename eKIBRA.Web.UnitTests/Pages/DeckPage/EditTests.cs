@@ -14,7 +14,6 @@ namespace eKIBRA.Web.UnitTests.Pages.DeckPage;
 
 public sealed class EditTests : IDisposable
 {
-    private readonly Mock<ILogger<EditModel>> _mockLogger;
     private readonly Mock<UserManager<ApplicationUser>> _mockUserManager;
     private readonly Mock<SignInManager<ApplicationUser>> _mockSignInManager;
     private readonly ApplicationDbContext _context;
@@ -31,16 +30,16 @@ public sealed class EditTests : IDisposable
         _context = new ApplicationDbContext(options);
 
         // Setup mocks
-        _mockLogger = new Mock<ILogger<EditModel>>();
+        var mockLogger = new Mock<ILogger<EditModel>>();
 
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
 
         _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             _mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-            null, null, null, null);
+            null!, null!, null!, null!);
 
         // Create test users
         _testUser = new ApplicationUser
@@ -61,7 +60,7 @@ public sealed class EditTests : IDisposable
 
         // Create page model
         _pageModel = new EditModel(
-            _mockLogger.Object,
+            mockLogger.Object,
             _context,
             _mockUserManager.Object,
             _mockSignInManager.Object);

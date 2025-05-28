@@ -29,13 +29,13 @@ public sealed class ExceptionTests : IDisposable
         var mockCreateModelLogger = new Mock<ILogger<CreateModel>>();
 
         var mockUserManager = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
 
         var mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-            null, null, null, null);
+            null!, null!, null!, null!);
 
         // Create page model
         _pageCreateModel = new CreateModel(

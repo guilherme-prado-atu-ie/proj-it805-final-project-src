@@ -31,13 +31,13 @@ public sealed class CreateTests : IDisposable
         _mockLogger = new Mock<ILogger<CreateModel>>();
 
         _mockUserManager = new Mock<UserManager<ApplicationUser>>(
-            Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
+            Mock.Of<IUserStore<ApplicationUser>>(), null!, null!, null!, null!, null!, null!, null!, null!);
 
         _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
             _mockUserManager.Object,
             Mock.Of<IHttpContextAccessor>(),
             Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-            null, null, null, null);
+            null!, null!, null!, null!);
 
         // Create page model
         _pageModel = new CreateModel(
