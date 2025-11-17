@@ -16,7 +16,7 @@ RUN dotnet publish -c release -o /app \
     --use-current-runtime
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
 EXPOSE 80/tcp
 EXPOSE 443/tcp
 
